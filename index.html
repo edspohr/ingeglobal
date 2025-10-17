@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Usando un placeholder que se adapte al tema oscuro -->
     <link rel="icon" href="img/logo.png" type="image/png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
@@ -72,19 +71,22 @@
             padding: 1rem 1.5rem;
             text-align: left;
         }
+        /* Estilos para el logo con sombra */
+        .logo-shadow {
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6)); /* Sombra blanca sutil */
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-300">
 
-    <!-- =========== VISTA DE LOGIN =========== -->
-    <div id="loginView" class="view active">
+    <!-- =========== VISTA DE LOGIN =========== --><div id="loginView" class="view active">
         <video autoplay muted loop id="login-video">
             <source src="vid/login.mp4" type="video/mp4">
             Tu navegador no soporta videos HTML5.
         </video>
         <div class="flex items-center justify-center min-h-screen bg-black bg-opacity-30">
             <div class="bg-gray-800 bg-opacity-90 backdrop-blur-sm p-8 md:p-12 rounded-2xl shadow-2xl w-full max-w-md m-4 text-center transform transition-all duration-500 hover:scale-105 border border-gray-700">
-                <img src="img/logo.png" alt="Logo Ingeglobal" class="mx-auto mb-8 h-12">
+                <img src="img/logo.png" alt="Logo Ingeglobal" class="mx-auto mb-8 h-16 logo-shadow">
                 
                 <h2 class="text-2xl font-bold text-white mb-2">Portal de Clientes</h2>
                 <p class="text-gray-400 mb-8">Accede a tus datos de medición.</p>
@@ -118,13 +120,11 @@
         </div>
     </div>
 
-    <!-- =========== VISTA DE DASHBOARD (ADMIN Y USUARIO) =========== -->
-    <div id="dashboardView" class="view">
+    <!-- =========== VISTA DE DASHBOARD (ADMIN Y USUARIO) =========== --><div id="dashboardView" class="view">
         <div class="flex h-screen">
-            <!-- Sidebar -->
-            <aside class="w-64 bg-[#111827] text-gray-400 flex flex-col">
+            <!-- Sidebar --><aside class="w-64 bg-[#111827] text-gray-400 flex flex-col">
                 <div class="h-20 flex items-center justify-center border-b border-gray-700">
-                    <img src="img/logo.png" alt="Logo Ingeglobal" class="h-10">
+                    <img src="img/logo.png" alt="Logo Ingeglobal" class="h-12 logo-shadow">
                 </div>
                 <nav id="sidebarNav" class="flex-1 px-4 py-6 space-y-2"></nav>
                 <div class="px-4 py-4 border-t border-gray-700">
@@ -142,8 +142,7 @@
                 </div>
             </aside>
 
-            <!-- Main Content -->
-            <main class="flex-1 flex flex-col overflow-hidden">
+            <!-- Main Content --><main class="flex-1 flex flex-col overflow-hidden">
                 <header class="h-20 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-8">
                     <h1 class="text-2xl font-bold text-white" id="main-title">Dashboard</h1>
                     <div id="admin-controls" class="hidden items-center space-x-4">
@@ -153,8 +152,7 @@
                     </div>
                 </header>
                 <div class="flex-1 overflow-y-auto p-8 bg-gray-900">
-                    <!-- Contenido dinámico del dashboard -->
-                    <div id="dashboard-content"></div>
+                    <!-- Contenido dinámico del dashboard --><div id="dashboard-content"></div>
                 </div>
             </main>
         </div>
