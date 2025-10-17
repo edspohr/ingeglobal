@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ingeglobal - Portal de Clientes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Usando un placeholder que se adapte al tema oscuro -->
+    <link rel="icon" href="https://placehold.co/32x32/D4A24E/111827?text=IG&font=inter" type="image/png">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        #login-video {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            z-index: -1;
+            object-fit: cover;
+            filter: brightness(0.5); /* Oscurecemos el video para mejor contraste */
+        }
+        .view {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .view.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .sidebar-link {
+            transition: all 0.2s ease;
+        }
+        .sidebar-link:hover {
+            background-color: #4A6582; /* Azul pizarra */
+            color: white;
+            transform: translateX(4px);
+        }
+        .sidebar-link.active {
+            background-color: #D4A24E; /* Dorado */
+            color: #111827; /* Texto oscuro para contraste */
+            font-weight: 600;
+            transform: translateX(4px);
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        .btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+        .table th {
+            font-weight: 600;
+        }
+        .table td, .table th {
+            padding: 1rem 1.5rem;
+            text-align: left;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-300">
+
+    <!-- =========== VISTA DE LOGIN =========== -->
+    <div id="loginView" class="view active">
+        <video autoplay muted loop id="login-video">
+            <source src="https://assets.mixkit.co/videos/preview/mixkit-drone-shot-of-a-beautiful-green-mountain-49938-large.mp4" type="video/mp4">
+            Tu navegador no soporta videos HTML5.
+        </video>
+        <div class="flex items-center justify-center min-h-screen bg-black bg-opacity-30">
+            <div class="bg-gray-800 bg-opacity-90 backdrop-blur-sm p-8 md:p-12 rounded-2xl shadow-2xl w-full max-w-md m-4 text-center transform transition-all duration-500 hover:scale-105 border border-gray-700">
+                <img src="https://placehold.co/200x60/FFFFFF/111827?text=Ingeglobal&font=inter" alt="Logo Ingeglobal" class="mx-auto mb-8 h-12">
+                
+                <h2 class="text-2xl font-bold text-white mb-2">Portal de Clientes</h2>
+                <p class="text-gray-400 mb-8">Accede a tus datos de medición.</p>
+
+                <form id="loginForm">
+                    <div class="mb-4 text-left">
+                        <label for="email" class="block text-sm font-medium text-gray-400 mb-1">Usuario</label>
+                        <input type="text" id="email" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#D4A24E] focus:border-[#D4A24E] transition text-white" placeholder="admin o user">
+                    </div>
+                    <div class="mb-6 text-left">
+                        <label for="password" class="block text-sm font-medium text-gray-400 mb-1">Contraseña</label>
+                        <input type="password" id="password" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#D4A24E] focus:border-[#D4A24E] transition text-white" placeholder="123">
+                    </div>
+
+                    <button type="submit" class="w-full bg-[#D4A24E] text-gray-900 py-2.5 rounded-lg font-semibold hover:bg-[#E4B56E] focus:outline-none focus:ring-4 focus:ring-[#d4a24e]/50 btn">
+                        Ingresar
+                    </button>
+                </form>
+
+                <div class="my-6 flex items-center">
+                    <div class="flex-grow border-t border-gray-600"></div>
+                    <span class="flex-shrink mx-4 text-gray-500 text-sm">O</span>
+                    <div class="flex-grow border-t border-gray-600"></div>
+                </div>
+
+                <button disabled class="w-full bg-gray-700 text-gray-500 py-2.5 rounded-lg font-semibold flex items-center justify-center cursor-not-allowed">
+                    <svg class="w-5 h-5 mr-2" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.222,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571l6.19,5.238C42.022,35.138,44,30.024,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path></svg>
+                    Ingresar con Google
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========== VISTA DE DASHBOARD (ADMIN Y USUARIO) =========== -->
+    <div id="dashboardView" class="view">
+        <div class="flex h-screen">
+            <!-- Sidebar -->
+            <aside class="w-64 bg-[#111827] text-gray-400 flex flex-col">
+                <div class="h-20 flex items-center justify-center border-b border-gray-700">
+                    <img src="https://placehold.co/180x50/FFFFFF/111827?text=Ingeglobal&font=inter" alt="Logo Ingeglobal" class="h-10">
+                </div>
+                <nav id="sidebarNav" class="flex-1 px-4 py-6 space-y-2"></nav>
+                <div class="px-4 py-4 border-t border-gray-700">
+                    <div id="user-info" class="flex items-center">
+                        <i data-feather="user" class="w-8 h-8 mr-3 text-gray-500"></i>
+                        <div>
+                            <p class="font-semibold text-sm text-white" id="userName">Cargando...</p>
+                            <p class="text-xs text-gray-500" id="userRole">Cargando...</p>
+                        </div>
+                    </div>
+                    <button id="logoutButton" class="w-full mt-4 flex items-center justify-center text-sm text-gray-400 hover:text-white bg-gray-700 hover:bg-red-600 rounded-md py-2 transition-colors">
+                        <i data-feather="log-out" class="w-4 h-4 mr-2"></i>
+                        Cerrar Sesión
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1 flex flex-col overflow-hidden">
+                <header class="h-20 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-8">
+                    <h1 class="text-2xl font-bold text-white" id="main-title">Dashboard</h1>
+                    <div id="admin-controls" class="hidden items-center space-x-4">
+                        <label for="client-select" class="text-sm font-medium text-gray-400">Seleccionar Cliente:</label>
+                        <select id="client-select" class="bg-gray-700 border border-gray-600 rounded-md px-3 py-1.5 text-sm text-white focus:ring-2 focus:ring-[#D4A24E] focus:border-[#D4A24E]">
+                        </select>
+                    </div>
+                </header>
+                <div class="flex-1 overflow-y-auto p-8 bg-gray-900">
+                    <!-- Contenido dinámico del dashboard -->
+                    <div id="dashboard-content"></div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+
+    <script>
+        // --- DATA DE EJEMPLO (Simula la data que vendría de Supabase) ---
+        const mockData = {
+            clients: {
+                'cliente_a': {
+                    name: "Constructora Andina",
+                    analytics: {
+                        totalVolume: 12580, // m³
+                        avgMoisture: 12.5, // %
+                        lastTruck: { id: "AB-CD-12", volume: 22, time: "14:30" },
+                        stockpiles: [
+                            { name: "Acopio A1 (Arena)", volume: 4500, moisture: 11.2 },
+                            { name: "Acopio B2 (Grava)", volume: 8080, moisture: 13.8 },
+                        ],
+                        history: {
+                            labels: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
+                            volumes: [12200, 12350, 12300, 12450, 12500, 12550, 12580]
+                        }
+                    },
+                    users: [
+                        { id: 1, name: "Juan Pérez", email: "juan.perez@andina.cl", active: true },
+                        { id: 2, name: "Ana Torres", email: "ana.torres@andina.cl", active: true },
+                        { id: 3, name: "Carlos Soto", email: "carlos.soto@andina.cl", active: false },
+                    ]
+                },
+                'cliente_b': {
+                    name: "Minerals del Pacífico",
+                    analytics: {
+                        totalVolume: 38900,
+                        avgMoisture: 8.2,
+                        lastTruck: { id: "XY-ZW-34", volume: 30, time: "15:05" },
+                        stockpiles: [
+                            { name: "Pila Norte (Cobre)", volume: 21200, moisture: 7.9 },
+                            { name: "Pila Sur (Cobre)", volume: 17700, moisture: 8.5 },
+                        ],
+                        history: {
+                            labels: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
+                            volumes: [38100, 38150, 38300, 38550, 38700, 38850, 38900]
+                        }
+                    },
+                    users: [
+                        { id: 4, name: "Sofía Castro", email: "scastro@pacifico.min", active: true }
+                    ]
+                }
+            }
+        };
+
+        const users = {
+            'admin': { role: 'admin', name: "Admin Ingeglobal" },
+            'user': { role: 'user', name: "Juan Pérez", clientId: 'cliente_a' }
+        };
+
+        // --- MANEJO DE ESTADO DE LA APP ---
+        let currentUser = null;
+        let currentClient = 'cliente_a'; 
+        let currentView = 'login';
+        let mainChart = null;
+
+        // --- RENDERIZADO DE VISTAS ---
+        const loginView = document.getElementById('loginView');
+        const dashboardView = document.getElementById('dashboardView');
+        const dashboardContent = document.getElementById('dashboard-content');
+        
+        function switchView(viewName) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(`${viewName}View`).classList.add('active');
+            currentView = viewName;
+        }
+        
+        // --- LÓGICA DE LOGIN ---
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('email').value.toLowerCase();
+            const password = document.getElementById('password').value; 
+
+            if (users[username] && password === '123') {
+                currentUser = users[username];
+                initDashboard();
+                switchView('dashboard');
+            } else {
+                alert('Credenciales incorrectas. Intenta con "admin" o "user" y contraseña "123".');
+            }
+        });
+        
+        document.getElementById('logoutButton').addEventListener('click', () => {
+             currentUser = null;
+             document.getElementById('email').value = '';
+             document.getElementById('password').value = '';
+             switchView('login');
+        });
+
+        // --- INICIALIZACIÓN DEL DASHBOARD ---
+        function initDashboard() {
+            const userNameEl = document.getElementById('userName');
+            const userRoleEl = document.getElementById('userRole');
+            const adminControls = document.getElementById('admin-controls');
+            const sidebarNav = document.getElementById('sidebarNav');
+
+            userNameEl.textContent = currentUser.name;
+            sidebarNav.innerHTML = ''; 
+
+            if (currentUser.role === 'admin') {
+                userRoleEl.textContent = "Administrador";
+                adminControls.classList.remove('hidden');
+                adminControls.classList.add('flex');
+                populateClientSelector();
+                
+                sidebarNav.innerHTML = `
+                    <a href="#" data-content="analytics" class="sidebar-link flex items-center px-4 py-2.5 rounded-md active"><i data-feather="bar-chart-2" class="w-5 h-5 mr-3"></i> Analítica</a>
+                    <a href="#" data-content="users" class="sidebar-link flex items-center px-4 py-2.5 rounded-md"><i data-feather="users" class="w-5 h-5 mr-3"></i> Gestión de Usuarios</a>
+                `;
+                
+                document.getElementById('client-select').addEventListener('change', (e) => {
+                    currentClient = e.target.value;
+                    renderAnalytics();
+                });
+
+                renderAnalytics();
+
+            } else { 
+                const clientData = mockData.clients[currentUser.clientId];
+                userRoleEl.textContent = clientData.name;
+                adminControls.classList.add('hidden');
+                
+                sidebarNav.innerHTML = `
+                    <a href="#" data-content="analytics" class="sidebar-link flex items-center px-4 py-2.5 rounded-md active"><i data-feather="bar-chart-2" class="w-5 h-5 mr-3"></i> Mis Mediciones</a>
+                    <a href="#" data-content="reports" class="sidebar-link flex items-center px-4 py-2.5 rounded-md"><i data-feather="file-text" class="w-5 h-5 mr-3"></i> Reportes</a>
+                    <a href="#" data-content="profile" class="sidebar-link flex items-center px-4 py-2.5 rounded-md"><i data-feather="settings" class="w-5 h-5 mr-3"></i> Mi Perfil</a>
+                `;
+                currentClient = currentUser.clientId;
+                renderAnalytics();
+            }
+
+            feather.replace();
+            setupSidebarNavigation();
+        }
+
+        function populateClientSelector() {
+            const select = document.getElementById('client-select');
+            select.innerHTML = '';
+            Object.keys(mockData.clients).forEach(clientId => {
+                const option = document.createElement('option');
+                option.value = clientId;
+                option.textContent = mockData.clients[clientId].name;
+                select.appendChild(option);
+            });
+            select.value = currentClient;
+        }
+        
+        function setupSidebarNavigation() {
+            const links = document.querySelectorAll('.sidebar-link');
+            links.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    links.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                    const contentId = link.getAttribute('data-content');
+                    
+                    switch(contentId) {
+                        case 'analytics': renderAnalytics(); break;
+                        case 'users': renderUserManagement(); break;
+                        case 'reports': renderPlaceholder("Gestión de Reportes"); break;
+                        case 'profile': renderPlaceholder("Configuración de Perfil"); break;
+                    }
+                });
+            });
+        }
+        
+        function renderPlaceholder(title) {
+            document.getElementById('main-title').textContent = title;
+            dashboardContent.innerHTML = `
+                <div class="bg-gray-800 p-8 rounded-lg shadow-lg text-center border border-gray-700">
+                    <h2 class="text-xl font-semibold text-white">Próximamente</h2>
+                    <p class="text-gray-400 mt-2">Esta sección estará disponible en futuras actualizaciones.</p>
+                </div>
+            `;
+        }
+
+        // --- RENDERIZADO DE CONTENIDO DEL DASHBOARD ---
+
+        function renderAnalytics() {
+            const client = mockData.clients[currentClient];
+            if (!client) return;
+
+            document.getElementById('main-title').textContent = "Dashboard de Analítica";
+            dashboardContent.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-lg flex items-center transform hover:scale-105 transition-transform border border-gray-700">
+                        <div class="bg-[#4A6582]/30 text-[#D4A24E] p-4 rounded-full mr-4"><i data-feather="database" class="w-8 h-8"></i></div>
+                        <div>
+                            <p class="text-sm text-gray-400">Volumen Total</p>
+                            <p class="text-3xl font-bold text-white">${client.analytics.totalVolume.toLocaleString('es-CL')} m³</p>
+                        </div>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-lg flex items-center transform hover:scale-105 transition-transform border border-gray-700">
+                        <div class="bg-green-500/10 text-green-400 p-4 rounded-full mr-4"><i data-feather="droplet" class="w-8 h-8"></i></div>
+                        <div>
+                            <p class="text-sm text-gray-400">Humedad Promedio</p>
+                            <p class="text-3xl font-bold text-white">${client.analytics.avgMoisture}%</p>
+                        </div>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-lg flex items-center transform hover:scale-105 transition-transform border border-gray-700">
+                        <div class="bg-yellow-500/10 text-yellow-400 p-4 rounded-full mr-4"><i data-feather="truck" class="w-8 h-8"></i></div>
+                        <div>
+                            <p class="text-sm text-gray-400">Último Camión (${client.analytics.lastTruck.id})</p>
+                            <p class="text-3xl font-bold text-white">${client.analytics.lastTruck.volume} m³ a las ${client.analytics.lastTruck.time}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+                        <h3 class="text-lg font-semibold mb-4 text-white">Historial de Volumen Semanal</h3>
+                        <div class="chart-container"><canvas id="volumeChart"></canvas></div>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+                        <h3 class="text-lg font-semibold mb-4 text-white">Detalle de Acopios</h3>
+                        <div id="stockpiles-list" class="space-y-4"></div>
+                    </div>
+                </div>
+            `;
+            
+            const stockpilesList = document.getElementById('stockpiles-list');
+            stockpilesList.innerHTML = client.analytics.stockpiles.map(s => `
+                <div class="bg-gray-700 p-4 rounded-md">
+                    <div class="flex justify-between items-center mb-1">
+                        <p class="font-semibold text-gray-200">${s.name}</p>
+                        <p class="text-sm text-[#D4A24E] font-bold">${s.volume.toLocaleString('es-CL')} m³</p>
+                    </div>
+                    <p class="text-xs text-gray-400">Humedad: ${s.moisture}%</p>
+                </div>
+            `).join('');
+
+            const ctx = document.getElementById('volumeChart').getContext('2d');
+            if (mainChart) mainChart.destroy();
+            mainChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: client.analytics.history.labels,
+                    datasets: [{
+                        label: 'Volumen (m³)',
+                        data: client.analytics.history.volumes,
+                        borderColor: '#D4A24E',
+                        backgroundColor: 'rgba(212, 162, 78, 0.2)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#D4A24E',
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { 
+                            beginAtZero: false,
+                            ticks: { color: 'rgba(255, 255, 255, 0.7)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: 'rgba(255, 255, 255, 0.7)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+            feather.replace();
+        }
+
+        function renderUserManagement() {
+            const client = mockData.clients[currentClient];
+            if (!client) return;
+
+            document.getElementById('main-title').textContent = `Usuarios de ${client.name}`;
+            dashboardContent.innerHTML = `
+                <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700">
+                    <div class="p-6 border-b border-gray-700 flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-white">Listado de Usuarios</h3>
+                        <button class="bg-[#D4A24E] text-gray-900 px-4 py-2 rounded-md font-semibold hover:bg-[#E4B56E] btn flex items-center">
+                           <i data-feather="plus" class="w-4 h-4 mr-2"></i> Agregar Usuario
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full table">
+                            <thead class="bg-gray-700/50">
+                                <tr>
+                                    <th class="text-gray-400">Nombre</th>
+                                    <th class="text-gray-400">Email</th>
+                                    <th class="text-gray-400">Estado</th>
+                                    <th class="text-gray-400">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body" class="divide-y divide-gray-700"></tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            const usersTableBody = document.getElementById('users-table-body');
+            usersTableBody.innerHTML = client.users.map(user => `
+                <tr class="hover:bg-gray-700/50">
+                    <td class="text-white">${user.name}</td>
+                    <td>${user.email}</td>
+                    <td>
+                        <span class="px-3 py-1 text-xs font-medium rounded-full ${user.active ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}">
+                            ${user.active ? 'Activo' : 'Inactivo'}
+                        </span>
+                    </td>
+                    <td class="flex items-center space-x-2 py-4">
+                        <button title="Editar" class="text-gray-500 hover:text-[#D4A24E]"><i data-feather="edit-2" class="w-5 h-5"></i></button>
+                        <button title="${user.active ? 'Desactivar' : 'Activar'}" class="text-gray-500 ${user.active ? 'hover:text-red-500' : 'hover:text-green-500'}">
+                            ${user.active ? '<i data-feather="toggle-left" class="w-5 h-5"></i>' : '<i data-feather="toggle-right" class="w-5 h-5"></i>'}
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            feather.replace();
+        }
+
+        // --- INICIALIZACIÓN GENERAL ---
+        feather.replace();
+
+    </script>
+</body>
+</html>
+
