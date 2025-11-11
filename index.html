@@ -206,6 +206,102 @@
             }
         };
 
+        const plantaLoBlanco = {
+            general: {
+                dailyProduction: 3980,
+                weeklyProduction: 27860,
+                monthlyProduction: 112540,
+                efficiency: 92,
+                alerts: [
+                    "Sobrecarga en cinta transportadora principal",
+                    "Desviación de humedad detectada en línea secundaria"
+                ]
+            },
+            dashboard1: {
+                flowRates: {
+                    arena: 1.32,
+                    gravilla: 0.99,
+                    grava: 0.82,
+                    otros: 0.16
+                },
+                accumulators: {
+                    hourly: 475,
+                    daily: 4380,
+                    monthly: 118200
+                },
+                lineChart: {
+                    labels: ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00"],
+                    datasets: {
+                        Arena: [1.18, 1.25, 1.34, 1.32, 1.29, 1.3],
+                        Gravilla: [0.9, 0.94, 0.99, 1.01, 0.97, 0.99],
+                        Grava: [0.76, 0.8, 0.83, 0.85, 0.82, 0.82],
+                        Otros: [0.14, 0.15, 0.17, 0.16, 0.15, 0.16]
+                    }
+                },
+                heatmap: [
+                    { cinta: "Arena", status: "Estable", level: "bg-green-500/10", text: "text-green-400" },
+                    { cinta: "Gravilla", status: "Vibración alta", level: "bg-yellow-500/10", text: "text-yellow-400" },
+                    { cinta: "Grava", status: "Detención breve", level: "bg-red-500/10", text: "text-red-400" },
+                    { cinta: "Otros", status: "Monitoreo preventivo", level: "bg-blue-500/10", text: "text-blue-400" }
+                ]
+            },
+            dashboard2: {
+                arcones: [
+                    { id: "Arcon #1", inicial: 8400, final: 7680, consumo: 720 },
+                    { id: "Arcon #2", inicial: 6250, final: 5980, consumo: 270 }
+                ],
+                reposicion: "Proyección de reposición automática programada cada 12 horas."
+            },
+            dashboard3: {
+                operationalTrucks: 18,
+                averageTrips: 112,
+                dailyTonnage: 2450,
+                companies: ["Polpai", "Aridtech", "Translo"],
+                highlightedTruck: {
+                    plate: "GHYB-72",
+                    material: "Gravilla 20 mm",
+                    capacity: 18,
+                    dailyRuns: 6,
+                    weeklyVolume: 648
+                }
+            },
+            dashboard4: {
+                dailyVolume: 1280,
+                perMinute: 0.95,
+                weeklyAverage: 8920,
+                anomalies: ["Variación de granulometría superior al 7%"],
+                composition: {
+                    labels: ["Arena gruesa", "Gravilla 10 mm", "Filler"],
+                    values: [42, 38, 20]
+                },
+                hourlyPerformance: {
+                    labels: ["08:00", "10:00", "12:00", "14:00", "16:00", "18:00"],
+                    values: [0.92, 0.97, 0.95, 0.98, 0.94, 0.96]
+                }
+            },
+            dashboard5: {
+                stockpiles: [
+                    { producto: "Arena", cota: 384, volumen: 15848, variacion: -3 },
+                    { producto: "Filler", cota: 72, volumen: 552, variacion: 5 },
+                    { producto: "Integral Grande", cota: 0, volumen: 31792, variacion: 0 },
+                    { producto: "Gravilla 20mm", cota: 0, volumen: 18677, variacion: 2 },
+                    { producto: "Bajo Integral", cota: 0, volumen: 4631, variacion: -6 }
+                ],
+                notes: [
+                    "Modelo 3D interactivo con topografía generada por dron DJI M300 RTK.",
+                    "Alertas automáticas para sobrellenado y compactación irregular basadas en series históricas."
+                ]
+            },
+            dashboard6: {
+                monthlyProduction: 112540,
+                projectedRevenue: 188000000,
+                averageCost: 1420,
+                operatingMargin: 34,
+                droneStatus: "DJI M300 RTK — Último vuelo 10/11/2025",
+                sensorsOnline: { active: 18, total: 20 }
+            }
+        };
+
         const users = {
             'admin': { role: 'admin', name: "Admin Ingeglobal" },
             'user': { role: 'user', name: "Juan Pérez", clientId: 'cliente_a' }
@@ -216,6 +312,9 @@
         let currentClient = 'cliente_a'; 
         let currentView = 'login';
         let mainChart = null;
+        let arconesChart = null;
+        let buzonPieChart = null;
+        let buzonTrendChart = null;
 
         // --- RENDERIZADO DE VISTAS ---
         const loginView = document.getElementById('loginView');
@@ -340,93 +439,405 @@
         // --- RENDERIZADO DE CONTENIDO DEL DASHBOARD ---
 
         function renderAnalytics() {
-            const client = mockData.clients[currentClient];
-            if (!client) return;
+            document.getElementById('main-title').textContent = "Monitoreo Integral Planta Lo Blanco";
 
-            document.getElementById('main-title').textContent = "Dashboard de Analítica";
             dashboardContent.innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                    <div class="bg-gray-800 p-6 rounded-lg shadow-lg flex items-center transform hover:scale-105 transition-transform border border-gray-700">
-                        <div class="bg-[#4A6582]/30 text-[#D4A24E] p-4 rounded-full mr-4"><i data-feather="database" class="w-8 h-8"></i></div>
-                        <div>
-                            <p class="text-sm text-gray-400">Volumen Total</p>
-                            <p class="text-3xl font-bold text-white">${client.analytics.totalVolume.toLocaleString('es-CL')} m³</p>
+                <section class="mb-10">
+                    <h2 class="text-xl font-semibold text-white flex items-center"><span class="text-2xl mr-2">🧭</span>Panel General — Planta Lo Blanco</h2>
+                    <p class="text-gray-400 mt-2">Vista panorámica del rendimiento operativo de la planta de áridos medida por Ingeglobal. Centraliza información de drones, sensores volumétricos y controladores industriales.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 mt-6">
+                        <div class="bg-gray-800 p-5 rounded-lg border border-gray-700 shadow-lg">
+                            <p class="text-sm text-gray-400">Producción diaria total</p>
+                            <p class="text-3xl font-bold text-white">${plantaLoBlanco.general.dailyProduction.toLocaleString('es-CL')} m³</p>
+                        </div>
+                        <div class="bg-gray-800 p-5 rounded-lg border border-gray-700 shadow-lg">
+                            <p class="text-sm text-gray-400">Producción semanal</p>
+                            <p class="text-3xl font-bold text-white">${plantaLoBlanco.general.weeklyProduction.toLocaleString('es-CL')} m³</p>
+                        </div>
+                        <div class="bg-gray-800 p-5 rounded-lg border border-gray-700 shadow-lg">
+                            <p class="text-sm text-gray-400">Producción mensual</p>
+                            <p class="text-3xl font-bold text-white">${plantaLoBlanco.general.monthlyProduction.toLocaleString('es-CL')} m³</p>
+                        </div>
+                        <div class="bg-gray-800 p-5 rounded-lg border border-gray-700 shadow-lg">
+                            <p class="text-sm text-gray-400">Eficiencia promedio planta</p>
+                            <p class="text-3xl font-bold text-green-400">${plantaLoBlanco.general.efficiency}%</p>
+                        </div>
+                        <div class="bg-gray-800 p-5 rounded-lg border border-gray-700 shadow-lg">
+                            <p class="text-sm text-gray-400">Alertas activas</p>
+                            <p class="text-3xl font-bold text-red-400">${plantaLoBlanco.general.alerts.length}</p>
+                            <ul class="mt-2 text-xs text-gray-400 space-y-1">
+                                ${plantaLoBlanco.general.alerts.map(alert => `<li class="flex items-start"><span class="text-red-500 mr-2">•</span>${alert}</li>`).join('')}
+                            </ul>
                         </div>
                     </div>
-                    <div class="bg-gray-800 p-6 rounded-lg shadow-lg flex items-center transform hover:scale-105 transition-transform border border-gray-700">
-                        <div class="bg-green-500/10 text-green-400 p-4 rounded-full mr-4"><i data-feather="droplet" class="w-8 h-8"></i></div>
-                        <div>
-                            <p class="text-sm text-gray-400">Humedad Promedio</p>
-                            <p class="text-3xl font-bold text-white">${client.analytics.avgMoisture}%</p>
-                        </div>
-                    </div>
-                    <div class="bg-gray-800 p-6 rounded-lg shadow-lg flex items-center transform hover:scale-105 transition-transform border border-gray-700">
-                        <div class="bg-yellow-500/10 text-yellow-400 p-4 rounded-full mr-4"><i data-feather="truck" class="w-8 h-8"></i></div>
-                        <div>
-                            <p class="text-sm text-gray-400">Último Camión (${client.analytics.lastTruck.id})</p>
-                            <p class="text-3xl font-bold text-white">${client.analytics.lastTruck.volume} m³ a las ${client.analytics.lastTruck.time}</p>
-                        </div>
-                    </div>
-                </div>
+                </section>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
-                        <h3 class="text-lg font-semibold mb-4 text-white">Historial de Volumen Semanal</h3>
-                        <div class="chart-container"><canvas id="volumeChart"></canvas></div>
+                <section class="mb-10">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-white flex items-center"><span class="text-2xl mr-2">🪜</span>Dashboard 1 — Medición de Volumen en Cintas Transportadoras</h3>
+                        <span class="text-xs text-gray-500 uppercase tracking-wide">Actualización continua</span>
                     </div>
-                    <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
-                        <h3 class="text-lg font-semibold mb-4 text-white">Detalle de Acopios</h3>
-                        <div id="stockpiles-list" class="space-y-4"></div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                                <div class="bg-gray-900/40 p-4 rounded-md">
+                                    <p class="text-xs text-gray-400">Arena</p>
+                                    <p class="text-2xl font-bold text-white">${plantaLoBlanco.dashboard1.flowRates.arena.toFixed(2)} m³/min</p>
+                                </div>
+                                <div class="bg-gray-900/40 p-4 rounded-md">
+                                    <p class="text-xs text-gray-400">Gravilla</p>
+                                    <p class="text-2xl font-bold text-white">${plantaLoBlanco.dashboard1.flowRates.gravilla.toFixed(2)} m³/min</p>
+                                </div>
+                                <div class="bg-gray-900/40 p-4 rounded-md">
+                                    <p class="text-xs text-gray-400">Grava</p>
+                                    <p class="text-2xl font-bold text-white">${plantaLoBlanco.dashboard1.flowRates.grava.toFixed(2)} m³/min</p>
+                                </div>
+                                <div class="bg-gray-900/40 p-4 rounded-md">
+                                    <p class="text-xs text-gray-400">Otros</p>
+                                    <p class="text-2xl font-bold text-white">${plantaLoBlanco.dashboard1.flowRates.otros.toFixed(2)} m³/min</p>
+                                </div>
+                            </div>
+                            <div class="chart-container h-72"><canvas id="flowChart"></canvas></div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 text-sm text-gray-300">
+                                <div class="bg-gray-900/40 p-4 rounded-md">
+                                    <p class="text-xs text-gray-400">Acumulado horario</p>
+                                    <p class="text-xl font-semibold text-white">${plantaLoBlanco.dashboard1.accumulators.hourly.toLocaleString('es-CL')} m³</p>
+                                </div>
+                                <div class="bg-gray-900/40 p-4 rounded-md">
+                                    <p class="text-xs text-gray-400">Acumulado diario</p>
+                                    <p class="text-xl font-semibold text-white">${plantaLoBlanco.dashboard1.accumulators.daily.toLocaleString('es-CL')} m³</p>
+                                </div>
+                                <div class="bg-gray-900/40 p-4 rounded-md">
+                                    <p class="text-xs text-gray-400">Acumulado mensual</p>
+                                    <p class="text-xl font-semibold text-white">${plantaLoBlanco.dashboard1.accumulators.monthly.toLocaleString('es-CL')} m³</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
+                            <h4 class="text-md font-semibold text-white mb-4">Mapa de calor — Vibración y detenciones</h4>
+                            <div class="space-y-4">
+                                ${plantaLoBlanco.dashboard1.heatmap.map(item => `
+                                    <div class="p-4 rounded-md ${item.level} border border-gray-700/50">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-semibold text-white">${item.cinta}</span>
+                                            <span class="text-xs ${item.text}">${item.status}</span>
+                                        </div>
+                                        <p class="text-xs text-gray-400 mt-2">Sensores de vibración y temperatura monitoreando en tiempo real.</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
                     </div>
-                </div>
+                </section>
+
+                <section class="mb-10">
+                    <h3 class="text-lg font-semibold text-white flex items-center mb-4"><span class="text-2xl mr-2">🧱</span>Dashboard 2 — Medición de Volumen en Arcones</h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="text-left text-gray-400 border-b border-gray-700">
+                                            <th class="py-2">Arcon</th>
+                                            <th class="py-2">Volumen inicial</th>
+                                            <th class="py-2">Volumen final</th>
+                                            <th class="py-2">Consumo diario</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${plantaLoBlanco.dashboard2.arcones.map(arcon => `
+                                            <tr class="border-b border-gray-800 text-gray-200">
+                                                <td class="py-3 font-semibold">${arcon.id}</td>
+                                                <td class="py-3">${arcon.inicial.toLocaleString('es-CL')} m³</td>
+                                                <td class="py-3">${arcon.final.toLocaleString('es-CL')} m³</td>
+                                                <td class="py-3 text-[#D4A24E] font-medium">${arcon.consumo.toLocaleString('es-CL')} m³</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="chart-container h-64 mt-6"><canvas id="arconesChart"></canvas></div>
+                        </div>
+                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg flex flex-col justify-between">
+                            <p class="text-gray-300 text-sm leading-relaxed">${plantaLoBlanco.dashboard2.reposicion}</p>
+                            <div class="mt-6 p-4 bg-gray-900/40 rounded-md text-xs text-gray-400">
+                                <p>Algoritmo de reposición sugiere órdenes automáticas cuando el volumen proyectado alcanza el 30% del stock inicial.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="mb-10">
+                    <h3 class="text-lg font-semibold text-white flex items-center mb-4"><span class="text-2xl mr-2">🚛</span>Dashboard 3 — Control de Transporte de Material</h3>
+                    <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
+                            <p class="text-sm text-gray-400">Camiones operativos</p>
+                            <p class="text-3xl font-bold text-white">${plantaLoBlanco.dashboard3.operationalTrucks}</p>
+                        </div>
+                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
+                            <p class="text-sm text-gray-400">Viajes diarios promedio</p>
+                            <p class="text-3xl font-bold text-white">${plantaLoBlanco.dashboard3.averageTrips}</p>
+                        </div>
+                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
+                            <p class="text-sm text-gray-400">Toneladas transportadas (día)</p>
+                            <p class="text-3xl font-bold text-white">${plantaLoBlanco.dashboard3.dailyTonnage.toLocaleString('es-CL')} t</p>
+                        </div>
+                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
+                            <p class="text-sm text-gray-400">Empresas registradas</p>
+                            <p class="text-sm font-semibold text-[#D4A24E]">${plantaLoBlanco.dashboard3.companies.join(', ')}</p>
+                        </div>
+                    </div>
+                    <div class="mt-6 bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="md:col-span-2">
+                            <h4 class="text-md font-semibold text-white">Detalle de camión destacado</h4>
+                            <ul class="mt-4 text-sm text-gray-300 space-y-2">
+                                <li><span class="text-gray-400">Patente:</span> ${plantaLoBlanco.dashboard3.highlightedTruck.plate}</li>
+                                <li><span class="text-gray-400">Material:</span> ${plantaLoBlanco.dashboard3.highlightedTruck.material}</li>
+                                <li><span class="text-gray-400">Capacidad:</span> ${plantaLoBlanco.dashboard3.highlightedTruck.capacity} m³</li>
+                                <li><span class="text-gray-400">Vueltas hoy:</span> ${plantaLoBlanco.dashboard3.highlightedTruck.dailyRuns}</li>
+                                <li><span class="text-gray-400">Transporte acumulado semanal:</span> ${plantaLoBlanco.dashboard3.highlightedTruck.weeklyVolume.toLocaleString('es-CL')} m³</li>
+                            </ul>
+                        </div>
+                        <div class="bg-gray-900/40 rounded-lg p-4 flex flex-col items-center justify-center text-center">
+                            <div class="w-20 h-20 bg-gray-700 rounded-full mb-4 flex items-center justify-center">
+                                <i data-feather="activity" class="w-10 h-10 text-[#D4A24E]"></i>
+                            </div>
+                            <p class="text-sm text-gray-400">Tarjetas por camión con indicador de rendimiento individual y acceso a fotografías de tolva inspeccionadas por IA.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="mb-10">
+                    <h3 class="text-lg font-semibold text-white flex items-center mb-4"><span class="text-2xl mr-2">⚙️</span>Dashboard 4 — Monitoreo de Buzón Alimentador</h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div class="bg-gray-900/40 p-4 rounded-md">
+                                    <p class="text-xs text-gray-400">Volumen alimentado diario</p>
+                                    <p class="text-2xl font-bold text-white">${plantaLoBlanco.dashboard4.dailyVolume.toLocaleString('es-CL')} m³</p>
+                                </div>
+                                <div class="bg-gray-900/40 p-4 rounded-md">
+                                    <p class="text-xs text-gray-400">Consumo por minuto</p>
+                                    <p class="text-2xl font-bold text-white">${plantaLoBlanco.dashboard4.perMinute.toFixed(2)} m³/min</p>
+                                </div>
+                                <div class="bg-gray-900/40 p-4 rounded-md">
+                                    <p class="text-xs text-gray-400">Promedio semanal</p>
+                                    <p class="text-2xl font-bold text-white">${plantaLoBlanco.dashboard4.weeklyAverage.toLocaleString('es-CL')} m³</p>
+                                </div>
+                            </div>
+                            <div class="mt-6">
+                                <h4 class="text-sm font-semibold text-white mb-2">Anomalías detectadas</h4>
+                                <ul class="text-xs text-yellow-400 space-y-1">
+                                    ${plantaLoBlanco.dashboard4.anomalies.map(anomaly => `<li class="flex items-start"><span class="mr-2">•</span>${anomaly}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
+                            <h4 class="text-md font-semibold text-white mb-4">Composición por tipo de árido</h4>
+                            <div class="chart-container h-64"><canvas id="buzonPieChart"></canvas></div>
+                        </div>
+                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
+                            <h4 class="text-md font-semibold text-white mb-4">Rendimiento horario</h4>
+                            <div class="chart-container h-64"><canvas id="buzonTrendChart"></canvas></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="mb-10">
+                    <h3 class="text-lg font-semibold text-white flex items-center mb-4"><span class="text-2xl mr-2">🗻</span>Dashboard 5 — Monitoreo Volumétrico de Acopios</h3>
+                    <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="text-gray-400 border-b border-gray-700">
+                                        <th class="py-2">#</th>
+                                        <th class="py-2">Producto</th>
+                                        <th class="py-2">Cota Piso (m)</th>
+                                        <th class="py-2">Volumen (m³)</th>
+                                        <th class="py-2">Variación mensual</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${plantaLoBlanco.dashboard5.stockpiles.map((stockpile, index) => `
+                                        <tr class="border-b border-gray-800 text-gray-200">
+                                            <td class="py-3">${index + 1}</td>
+                                            <td class="py-3 font-semibold">${stockpile.producto}</td>
+                                            <td class="py-3">${stockpile.cota}</td>
+                                            <td class="py-3">${stockpile.volumen.toLocaleString('es-CL')}</td>
+                                            <td class="py-3 ${stockpile.variacion > 0 ? 'text-green-400' : stockpile.variacion < 0 ? 'text-red-400' : 'text-gray-300'}">${stockpile.variacion > 0 ? '+' : ''}${stockpile.variacion}%</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-300">
+                            ${plantaLoBlanco.dashboard5.notes.map(note => `<div class="bg-gray-900/40 p-4 rounded-md">${note}</div>`).join('')}
+                        </div>
+                    </div>
+                </section>
+
+                <section class="mb-10">
+                    <h3 class="text-lg font-semibold text-white flex items-center mb-4"><span class="text-2xl mr-2">🌐</span>Dashboard 6 — Reporte Ejecutivo</h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
+                            <p class="text-sm text-gray-400">Producción total mes</p>
+                            <p class="text-3xl font-bold text-white">${plantaLoBlanco.dashboard6.monthlyProduction.toLocaleString('es-CL')} m³</p>
+                        </div>
+                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
+                            <p class="text-sm text-gray-400">Ingresos proyectados</p>
+                            <p class="text-3xl font-bold text-white">$${plantaLoBlanco.dashboard6.projectedRevenue.toLocaleString('es-CL')}</p>
+                        </div>
+                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
+                            <p class="text-sm text-gray-400">Costo operativo promedio</p>
+                            <p class="text-3xl font-bold text-white">$${plantaLoBlanco.dashboard6.averageCost.toLocaleString('es-CL')}/m³</p>
+                        </div>
+                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
+                            <p class="text-sm text-gray-400">Margen operativo</p>
+                            <p class="text-3xl font-bold text-green-400">${plantaLoBlanco.dashboard6.operatingMargin}%</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
+                            <p class="text-sm text-gray-400">Dron activo</p>
+                            <p class="text-sm font-semibold text-white">${plantaLoBlanco.dashboard6.droneStatus}</p>
+                        </div>
+                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
+                            <p class="text-sm text-gray-400">Sensores en línea</p>
+                            <p class="text-2xl font-bold text-white">${plantaLoBlanco.dashboard6.sensorsOnline.active}/${plantaLoBlanco.dashboard6.sensorsOnline.total}</p>
+                            <p class="text-xs text-gray-500 mt-2">Integración SCADA + IoT para seguimiento de disponibilidad.</p>
+                        </div>
+                    </div>
+                </section>
             `;
-            
-            const stockpilesList = document.getElementById('stockpiles-list');
-            stockpilesList.innerHTML = client.analytics.stockpiles.map(s => `
-                <div class="bg-gray-700 p-4 rounded-md">
-                    <div class="flex justify-between items-center mb-1">
-                        <p class="font-semibold text-gray-200">${s.name}</p>
-                        <p class="text-sm text-[#D4A24E] font-bold">${s.volume.toLocaleString('es-CL')} m³</p>
-                    </div>
-                    <p class="text-xs text-gray-400">Humedad: ${s.moisture}%</p>
-                </div>
-            `).join('');
 
-            const ctx = document.getElementById('volumeChart').getContext('2d');
             if (mainChart) mainChart.destroy();
-            mainChart = new Chart(ctx, {
+            if (arconesChart) arconesChart.destroy();
+            if (buzonPieChart) buzonPieChart.destroy();
+            if (buzonTrendChart) buzonTrendChart.destroy();
+
+            const flowCtx = document.getElementById('flowChart').getContext('2d');
+            const flowDatasets = Object.entries(plantaLoBlanco.dashboard1.lineChart.datasets).map(([label, data], index) => {
+                const colors = ['#D4A24E', '#60A5FA', '#A855F7', '#34D399'];
+                return {
+                    label,
+                    data,
+                    borderColor: colors[index % colors.length],
+                    backgroundColor: `${colors[index % colors.length]}33`,
+                    tension: 0.35,
+                    fill: false,
+                    pointRadius: 3,
+                    pointHoverRadius: 5
+                };
+            });
+            mainChart = new Chart(flowCtx, {
                 type: 'line',
                 data: {
-                    labels: client.analytics.history.labels,
+                    labels: plantaLoBlanco.dashboard1.lineChart.labels,
+                    datasets: flowDatasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#D1D5DB' } } },
+                    scales: {
+                        x: {
+                            ticks: { color: 'rgba(209, 213, 219, 0.8)' },
+                            grid: { color: 'rgba(75, 85, 99, 0.3)' }
+                        },
+                        y: {
+                            ticks: { color: 'rgba(209, 213, 219, 0.8)' },
+                            grid: { color: 'rgba(75, 85, 99, 0.3)' }
+                        }
+                    }
+                }
+            });
+
+            const arconesCtx = document.getElementById('arconesChart').getContext('2d');
+            arconesChart = new Chart(arconesCtx, {
+                type: 'bar',
+                data: {
+                    labels: plantaLoBlanco.dashboard2.arcones.map(a => a.id),
+                    datasets: [
+                        {
+                            label: 'Volumen inicial',
+                            data: plantaLoBlanco.dashboard2.arcones.map(a => a.inicial),
+                            backgroundColor: 'rgba(96, 165, 250, 0.6)'
+                        },
+                        {
+                            label: 'Volumen final',
+                            data: plantaLoBlanco.dashboard2.arcones.map(a => a.final),
+                            backgroundColor: 'rgba(212, 162, 78, 0.7)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#D1D5DB' } } },
+                    scales: {
+                        x: {
+                            ticks: { color: 'rgba(209, 213, 219, 0.8)' },
+                            grid: { color: 'rgba(75, 85, 99, 0.2)' }
+                        },
+                        y: {
+                            ticks: { color: 'rgba(209, 213, 219, 0.8)' },
+                            grid: { color: 'rgba(75, 85, 99, 0.2)' }
+                        }
+                    }
+                }
+            });
+
+            const buzonPieCtx = document.getElementById('buzonPieChart').getContext('2d');
+            buzonPieChart = new Chart(buzonPieCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: plantaLoBlanco.dashboard4.composition.labels,
                     datasets: [{
-                        label: 'Volumen (m³)',
-                        data: client.analytics.history.volumes,
-                        borderColor: '#D4A24E',
-                        backgroundColor: 'rgba(212, 162, 78, 0.2)',
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: '#D4A24E',
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
+                        data: plantaLoBlanco.dashboard4.composition.values,
+                        backgroundColor: ['#F59E0B', '#3B82F6', '#6B7280'],
+                        borderColor: '#1F2937'
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: {
-                        y: { 
-                            beginAtZero: false,
-                            ticks: { color: 'rgba(255, 255, 255, 0.7)' },
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
-                        },
-                        x: {
-                            ticks: { color: 'rgba(255, 255, 255, 0.7)' },
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
-                        }
-                    },
-                    plugins: { legend: { display: false } }
+                    plugins: { legend: { labels: { color: '#D1D5DB' } } }
                 }
             });
+
+            const buzonTrendCtx = document.getElementById('buzonTrendChart').getContext('2d');
+            buzonTrendChart = new Chart(buzonTrendCtx, {
+                type: 'line',
+                data: {
+                    labels: plantaLoBlanco.dashboard4.hourlyPerformance.labels,
+                    datasets: [{
+                        label: 'm³/min',
+                        data: plantaLoBlanco.dashboard4.hourlyPerformance.values,
+                        borderColor: '#34D399',
+                        backgroundColor: 'rgba(52, 211, 153, 0.2)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 3,
+                        pointHoverRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            ticks: { color: 'rgba(209, 213, 219, 0.8)' },
+                            grid: { color: 'rgba(75, 85, 99, 0.2)' }
+                        },
+                        y: {
+                            ticks: { color: 'rgba(209, 213, 219, 0.8)' },
+                            grid: { color: 'rgba(75, 85, 99, 0.2)' }
+                        }
+                    }
+                }
+            });
+
             feather.replace();
         }
 
