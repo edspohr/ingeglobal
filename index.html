@@ -3,822 +3,769 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ingeglobal - Portal de Clientes</title>
+    <title>Ingeglobal - Plataforma IoT & Analytics</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" href="img/logo.png" type="image/png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Animaciones y Efectos */
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .glass-panel {
+            background: rgba(31, 41, 55, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
-        #login-video {
-            position: fixed;
-            right: 0;
-            bottom: 0;
-            min-width: 100%;
-            min-height: 100%;
-            z-index: -1;
-            object-fit: cover;
-            filter: brightness(0.5); /* Oscurecemos el video para mejor contraste */
+
+        .sidebar-active {
+            background: linear-gradient(90deg, rgba(212, 162, 78, 0.15) 0%, rgba(212, 162, 78, 0) 100%);
+            border-left: 3px solid #D4A24E;
+            color: #D4A24E;
         }
-        .view {
-            display: none;
-            animation: fadeIn 0.5s ease-in-out;
+
+        /* Video Background Fallback */
+        .video-bg {
+            position: fixed; right: 0; bottom: 0; min-width: 100%; min-height: 100%;
+            z-index: -1; object-fit: cover; filter: brightness(0.4);
+            background-color: #111827; /* Fallback si no hay video */
         }
-        .view.active {
-            display: block;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .sidebar-link {
-            transition: all 0.2s ease;
-        }
-        .sidebar-link:hover {
-            background-color: #4A6582; /* Azul pizarra */
-            color: white;
-            transform: translateX(4px);
-        }
-        .sidebar-link.active {
-            background-color: #D4A24E; /* Dorado */
-            color: #111827; /* Texto oscuro para contraste */
-            font-weight: 600;
-            transform: translateX(4px);
-        }
-        .chart-container {
-            position: relative;
-            height: 300px;
-            width: 100%;
-        }
-        .btn {
-            transition: all 0.2s ease-in-out;
-        }
-        .btn:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.1);
-        }
-        .table th {
-            font-weight: 600;
-        }
-        .table td, .table th {
-            padding: 1rem 1.5rem;
-            text-align: left;
-        }
-        /* Estilos para el logo con sombra */
-        .logo-shadow {
-            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6)); /* Sombra blanca sutil */
-        }
+
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #D4A24E; }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-300">
+<body class="bg-gray-900 text-gray-300 overflow-hidden">
 
-    <!-- =========== VISTA DE LOGIN =========== --><div id="loginView" class="view active">
-        <video autoplay muted loop id="login-video">
+    <div id="view-login" class="w-full h-screen flex items-center justify-center relative fade-in">
+        <video autoplay muted loop class="video-bg">
             <source src="vid/login.mp4" type="video/mp4">
-            Tu navegador no soporta videos HTML5.
         </video>
-        <div class="flex items-center justify-center min-h-screen bg-black bg-opacity-30">
-            <div class="bg-gray-800 bg-opacity-90 backdrop-blur-sm p-8 md:p-12 rounded-2xl shadow-2xl w-full max-w-md m-4 text-center transform transition-all duration-500 hover:scale-105 border border-gray-700">
-                <img src="img/logo.png" alt="Logo Ingeglobal" class="mx-auto mb-8 h-40 logo-shadow">
-                
-                <h2 class="text-2xl font-bold text-white mb-2">Portal de Clientes</h2>
-                <p class="text-gray-400 mb-8">Accede a tus datos de medición.</p>
+        
+        <div class="glass-panel p-10 rounded-2xl shadow-2xl w-full max-w-md mx-4 relative z-10">
+            <div class="text-center mb-8">
+                <img src="img/logo.png" alt="Ingeglobal" class="h-24 mx-auto mb-4 drop-shadow-lg hover:scale-105 transition-transform duration-300">
+                <h1 class="text-2xl font-bold text-white tracking-tight">Portal de Inteligencia Industrial</h1>
+                <p class="text-gray-400 text-sm mt-2">Acceso seguro a monitoreo y reportería</p>
+            </div>
 
-                <form id="loginForm">
-                    <div class="mb-4 text-left">
-                        <label for="email" class="block text-sm font-medium text-gray-400 mb-1">Usuario</label>
-                        <input type="text" id="email" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#D4A24E] focus:border-[#D4A24E] transition text-white" placeholder="admin o user">
+            <form id="loginForm" class="space-y-5">
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-gray-500 mb-1 font-semibold">Usuario</label>
+                    <div class="relative">
+                        <i data-feather="user" class="absolute left-3 top-3 w-5 h-5 text-gray-500"></i>
+                        <input type="text" id="username" class="w-full bg-gray-800/50 border border-gray-600 text-white rounded-lg py-2.5 pl-10 focus:ring-2 focus:ring-[#D4A24E] focus:border-transparent outline-none transition-all" placeholder="Ej: admin">
                     </div>
-                    <div class="mb-6 text-left">
-                        <label for="password" class="block text-sm font-medium text-gray-400 mb-1">Contraseña</label>
-                        <input type="password" id="password" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#D4A24E] focus:border-[#D4A24E] transition text-white" placeholder="123">
-                    </div>
-
-                    <button type="submit" class="w-full bg-[#D4A24E] text-gray-900 py-2.5 rounded-lg font-semibold hover:bg-[#E4B56E] focus:outline-none focus:ring-4 focus:ring-[#d4a24e]/50 btn">
-                        Ingresar
-                    </button>
-                </form>
-
-                <div class="my-6 flex items-center">
-                    <div class="flex-grow border-t border-gray-600"></div>
-                    <span class="flex-shrink mx-4 text-gray-500 text-sm">O</span>
-                    <div class="flex-grow border-t border-gray-600"></div>
                 </div>
-
-                <button disabled class="w-full bg-gray-700 text-gray-500 py-2.5 rounded-lg font-semibold flex items-center justify-center cursor-not-allowed">
-                    <svg class="w-5 h-5 mr-2" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.222,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571l6.19,5.238C42.022,35.138,44,30.024,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path></svg>
-                    Ingresar con Google
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-gray-500 mb-1 font-semibold">Contraseña</label>
+                    <div class="relative">
+                        <i data-feather="lock" class="absolute left-3 top-3 w-5 h-5 text-gray-500"></i>
+                        <input type="password" id="password" class="w-full bg-gray-800/50 border border-gray-600 text-white rounded-lg py-2.5 pl-10 focus:ring-2 focus:ring-[#D4A24E] focus:border-transparent outline-none transition-all" placeholder="••••••">
+                    </div>
+                </div>
+                
+                <button type="submit" class="w-full bg-gradient-to-r from-[#D4A24E] to-[#b88a3d] text-gray-900 font-bold py-3 rounded-lg hover:shadow-[0_0_15px_rgba(212,162,78,0.4)] transition-all transform hover:-translate-y-0.5">
+                    Iniciar Sesión
                 </button>
+            </form>
+            
+            <div class="mt-6 text-center">
+                <p class="text-xs text-gray-500">
+                    Perfiles Demo:<br>
+                    <span class="text-gray-400">super / admin / gerente / operario</span> (Pass: 123)
+                </p>
             </div>
         </div>
     </div>
 
-    <!-- =========== VISTA DE DASHBOARD (ADMIN Y USUARIO) =========== --><div id="dashboardView" class="view">
-        <div class="flex h-screen">
-            <!-- Sidebar --><aside class="w-64 bg-[#111827] text-gray-400 flex flex-col">
-                <div class="h-20 flex items-center justify-center border-b border-gray-700">
-                    <img src="img/logo.png" alt="Logo Ingeglobal" class="h-12 logo-shadow">
+    <div id="view-dashboard" class="hidden h-screen flex">
+        
+        <aside class="w-72 bg-[#0B1120] border-r border-gray-800 flex flex-col transition-all duration-300 relative z-20">
+            <div class="h-20 flex items-center px-6 border-b border-gray-800 bg-[#0f1623]">
+                <img src="img/logo.png" class="h-10 mr-3">
+                <span class="text-white font-bold text-lg tracking-wide">INGEGLOBAL</span>
+            </div>
+
+            <div class="px-6 py-6 border-b border-gray-800 bg-gray-900/30">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-600 flex items-center justify-center text-[#D4A24E] font-bold shadow-lg" id="userAvatar">
+                        U
+                    </div>
+                    <div class="ml-3 overflow-hidden">
+                        <p class="text-sm font-semibold text-white truncate" id="sidebarUserName">Usuario</p>
+                        <p class="text-xs text-[#D4A24E] uppercase tracking-wider truncate" id="sidebarUserRole">Rol</p>
+                    </div>
                 </div>
-                <nav id="sidebarNav" class="flex-1 px-4 py-6 space-y-2"></nav>
-                <div class="px-4 py-4 border-t border-gray-700">
-                    <div id="user-info" class="flex items-center">
-                        <i data-feather="user" class="w-8 h-8 mr-3 text-gray-500"></i>
-                        <div>
-                            <p class="font-semibold text-sm text-white" id="userName">Cargando...</p>
-                            <p class="text-xs text-gray-500" id="userRole">Cargando...</p>
+            </div>
+
+            <nav class="flex-1 overflow-y-auto py-6 px-3 space-y-1" id="sidebarMenu">
+                </nav>
+
+            <div class="p-4 border-t border-gray-800">
+                <button onclick="logout()" class="flex items-center w-full px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-red-900/20 rounded-lg transition-colors">
+                    <i data-feather="log-out" class="w-4 h-4 mr-3"></i> Cerrar Sesión
+                </button>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col bg-gray-900 relative overflow-hidden">
+            <header class="h-20 glass-panel border-b-0 border-gray-800 flex items-center justify-between px-8 z-10">
+                <div>
+                    <h2 class="text-2xl font-bold text-white" id="pageTitle">Dashboard</h2>
+                    <p class="text-xs text-gray-500 mt-0.5" id="currentDate">Cargando fecha...</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div id="clientSelectorContainer" class="hidden">
+                        <label class="text-xs text-gray-500 mr-2">Viendo como:</label>
+                        <select id="globalClientSelect" class="bg-gray-800 border border-gray-600 text-sm text-white rounded-md px-3 py-1 focus:border-[#D4A24E] outline-none">
+                            </select>
+                    </div>
+
+                    <div class="relative group">
+                        <button class="relative p-2 text-gray-400 hover:text-white transition-colors">
+                            <i data-feather="bell" class="w-6 h-6"></i>
+                            <span id="notifBadge" class="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full hidden"></span>
+                        </button>
+                        <div class="absolute right-0 mt-2 w-80 bg-gray-800 border border-gray-700 rounded-lg shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform translate-y-2 z-50">
+                            <div class="p-3 border-b border-gray-700 font-semibold text-white">Notificaciones</div>
+                            <div id="notificationList" class="max-h-64 overflow-y-auto p-2 space-y-2">
+                                <p class="text-center text-gray-500 text-sm py-4">Sin novedades recientes.</p>
+                            </div>
                         </div>
                     </div>
-                    <button id="logoutButton" class="w-full mt-4 flex items-center justify-center text-sm text-gray-400 hover:text-white bg-gray-700 hover:bg-red-600 rounded-md py-2 transition-colors">
-                        <i data-feather="log-out" class="w-4 h-4 mr-2"></i>
-                        Cerrar Sesión
-                    </button>
                 </div>
-            </aside>
+            </header>
 
-            <!-- Main Content --><main class="flex-1 flex flex-col overflow-hidden">
-                <header class="h-20 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-8">
-                    <h1 class="text-2xl font-bold text-white" id="main-title">Dashboard</h1>
-                    <div id="admin-controls" class="hidden items-center space-x-4">
-                        <label for="client-select" class="text-sm font-medium text-gray-400">Seleccionar Cliente:</label>
-                        <select id="client-select" class="bg-gray-700 border border-gray-600 rounded-md px-3 py-1.5 text-sm text-white focus:ring-2 focus:ring-[#D4A24E] focus:border-[#D4A24E]">
-                        </select>
-                    </div>
-                </header>
-                <div class="flex-1 overflow-y-auto p-8 bg-gray-900">
-                    <!-- Contenido dinámico del dashboard --><div id="dashboard-content"></div>
+            <div id="mainContent" class="flex-1 overflow-y-auto p-8 scroll-smooth">
                 </div>
-            </main>
-        </div>
+        </main>
     </div>
 
-
     <script>
-        // --- DATA DE EJEMPLO (Simula la data que vendría de Supabase) ---
-        const mockData = {
-            clients: {
-                'cliente_a': {
-                    name: "Constructora Andina",
-                    analytics: {
-                        totalVolume: 12580, // m³
-                        avgMoisture: 12.5, // %
-                        lastTruck: { id: "AB-CD-12", volume: 22, time: "14:30" },
-                        stockpiles: [
-                            { name: "Acopio A1 (Arena)", volume: 4500, moisture: 11.2 },
-                            { name: "Acopio B2 (Grava)", volume: 8080, moisture: 13.8 },
-                        ],
-                        history: {
-                            labels: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
-                            volumes: [12200, 12350, 12300, 12450, 12500, 12550, 12580]
-                        }
-                    },
-                    users: [
-                        { id: 1, name: "Juan Pérez", email: "juan.perez@andina.cl", active: true },
-                        { id: 2, name: "Ana Torres", email: "ana.torres@andina.cl", active: true },
-                        { id: 3, name: "Carlos Soto", email: "carlos.soto@andina.cl", active: false },
-                    ]
+        // --- 1. ESTRUCTURA DE DATOS (MOCK DB) ---
+        const ROLES = {
+            SUPERADMIN: 'superadmin',
+            ADMIN: 'admin',
+            GERENTE: 'gerente',
+            USER: 'user'
+        };
+
+        const DB = {
+            clients: [
+                { 
+                    id: 'c_andina', 
+                    name: 'Constructora Andina', 
+                    services: { liveMonitor: true, reports: true },
+                    logo: 'img/logo.png' 
                 },
-                'cliente_b': {
-                    name: "Minerals del Pacífico",
-                    analytics: {
-                        totalVolume: 38900,
-                        avgMoisture: 8.2,
-                        lastTruck: { id: "XY-ZW-34", volume: 30, time: "15:05" },
-                        stockpiles: [
-                            { name: "Pila Norte (Cobre)", volume: 21200, moisture: 7.9 },
-                            { name: "Pila Sur (Cobre)", volume: 17700, moisture: 8.5 },
-                        ],
-                        history: {
-                            labels: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
-                            volumes: [38100, 38150, 38300, 38550, 38700, 38850, 38900]
-                        }
-                    },
-                    users: [
-                        { id: 4, name: "Sofía Castro", email: "scastro@pacifico.min", active: true }
-                    ]
+                { 
+                    id: 'c_minerals', 
+                    name: 'Minerals del Pacífico', 
+                    services: { liveMonitor: true, reports: false },
+                    logo: 'img/logo.png' 
                 }
+            ],
+            users: [
+                { id: 1, user: 'super', pass: '123', role: ROLES.SUPERADMIN, name: 'Roberto Director', clientId: null },
+                { id: 2, user: 'admin', pass: '123', role: ROLES.ADMIN, name: 'Admin Andina', clientId: 'c_andina' },
+                { id: 3, user: 'gerente', pass: '123', role: ROLES.GERENTE, name: 'Gerente Planta', clientId: 'c_andina' },
+                { id: 4, user: 'operario', pass: '123', role: ROLES.USER, name: 'Juan Operador', clientId: 'c_andina', permissions: ['dashboard1', 'dashboard2'] }
+            ],
+            announcements: [
+                { id: 1, from: 'Ingeglobal', text: 'Mantenimiento programado de drones el 25/11.', target: 'global', date: '2023-11-20' }
+            ]
+        };
+
+        // --- DATA DEL DASHBOARD (Planta Lo Blanco) ---
+        const PLANT_DATA = {
+            general: { prod: 3980, weekly: 27860, eff: 92, alerts: 2 },
+            charts: {
+                flow: [1.18, 1.25, 1.34, 1.32, 1.29, 1.3],
+                labels: ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00"]
             }
         };
 
-        const plantaLoBlanco = {
-            general: {
-                dailyProduction: 3980,
-                weeklyProduction: 27860,
-                monthlyProduction: 112540,
-                efficiency: 92,
-                alerts: [
-                    "Sobrecarga en cinta transportadora principal",
-                    "Desviación de humedad detectada en línea secundaria"
-                ]
-            },
-            dashboard1: {
-                flowRates: {
-                    arena: 1.32,
-                    gravilla: 0.99,
-                    grava: 0.82,
-                    otros: 0.16
-                },
-                accumulators: {
-                    hourly: 475,
-                    daily: 4380,
-                    monthly: 118200
-                },
-                lineChart: {
-                    labels: ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00"],
-                    datasets: {
-                        Arena: [1.18, 1.25, 1.34, 1.32, 1.29, 1.3],
-                        Gravilla: [0.9, 0.94, 0.99, 1.01, 0.97, 0.99],
-                        Grava: [0.76, 0.8, 0.83, 0.85, 0.82, 0.82],
-                        Otros: [0.14, 0.15, 0.17, 0.16, 0.15, 0.16]
-                    }
-                },
-                heatmap: [
-                    { cinta: "Arena", status: "Estable", level: "bg-green-500/10", text: "text-green-400" },
-                    { cinta: "Gravilla", status: "Vibración alta", level: "bg-yellow-500/10", text: "text-yellow-400" },
-                    { cinta: "Grava", status: "Detención breve", level: "bg-red-500/10", text: "text-red-400" },
-                    { cinta: "Otros", status: "Monitoreo preventivo", level: "bg-blue-500/10", text: "text-blue-400" }
-                ]
-            },
-            dashboard2: {
-                arcones: [
-                    { id: "Arcon #1", inicial: 8400, final: 7680, consumo: 720 },
-                    { id: "Arcon #2", inicial: 6250, final: 5980, consumo: 270 }
-                ],
-                reposicion: "Proyección de reposición automática programada cada 12 horas."
-            },
-            dashboard3: {
-                operationalTrucks: 18,
-                averageTrips: 112,
-                dailyTonnage: 2450,
-                companies: ["Polpai", "Aridtech", "Translo"],
-                highlightedTruck: {
-                    plate: "GHYB-72",
-                    material: "Gravilla 20 mm",
-                    capacity: 18,
-                    dailyRuns: 6,
-                    weeklyVolume: 648
-                }
-            },
-            dashboard4: {
-                dailyVolume: 1280,
-                perMinute: 0.95,
-                weeklyAverage: 8920,
-                anomalies: ["Variación de granulometría superior al 7%"],
-                composition: {
-                    labels: ["Arena gruesa", "Gravilla 10 mm", "Filler"],
-                    values: [42, 38, 20]
-                },
-                hourlyPerformance: {
-                    labels: ["08:00", "10:00", "12:00", "14:00", "16:00", "18:00"],
-                    values: [0.92, 0.97, 0.95, 0.98, 0.94, 0.96]
-                }
-            },
-            dashboard5: {
-                stockpiles: [
-                    { producto: "Arena", cota: 384, volumen: 15848, variacion: -3 },
-                    { producto: "Filler", cota: 72, volumen: 552, variacion: 5 },
-                    { producto: "Integral Grande", cota: 0, volumen: 31792, variacion: 0 },
-                    { producto: "Gravilla 20mm", cota: 0, volumen: 18677, variacion: 2 },
-                    { producto: "Bajo Integral", cota: 0, volumen: 4631, variacion: -6 }
-                ],
-                notes: [
-                    "Modelo 3D interactivo con topografía generada por dron DJI M300 RTK.",
-                    "Alertas automáticas para sobrellenado y compactación irregular basadas en series históricas."
-                ]
-            },
-            dashboard6: {
-                monthlyProduction: 112540,
-                projectedRevenue: 188000000,
-                averageCost: 1420,
-                operatingMargin: 34,
-                droneStatus: "DJI M300 RTK — Último vuelo 10/11/2025",
-                sensorsOnline: { active: 18, total: 20 }
-            }
-        };
-
-        const users = {
-            'admin': { role: 'admin', name: "Admin Ingeglobal" },
-            'user': { role: 'user', name: "Juan Pérez", clientId: 'cliente_a' }
-        };
-
-        // --- MANEJO DE ESTADO DE LA APP ---
+        // --- STATE MANAGEMENT ---
         let currentUser = null;
-        let currentClient = 'cliente_a'; 
-        let currentView = 'login';
-        let mainChart = null;
-        let arconesChart = null;
-        let buzonPieChart = null;
-        let buzonTrendChart = null;
+        let currentClientContext = null; // Para Superadmin navegando clientes
+        let chartsInstances = {};
 
-        // --- RENDERIZADO DE VISTAS ---
-        const loginView = document.getElementById('loginView');
-        const dashboardView = document.getElementById('dashboardView');
-        const dashboardContent = document.getElementById('dashboard-content');
-        
-        function switchView(viewName) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById(`${viewName}View`).classList.add('active');
-            currentView = viewName;
-        }
-        
-        // --- LÓGICA DE LOGIN ---
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const username = document.getElementById('email').value.toLowerCase();
-            const password = document.getElementById('password').value; 
-
-            if (users[username] && password === '123') {
-                currentUser = users[username];
-                initDashboard();
-                switchView('dashboard');
-            } else {
-                alert('Credenciales incorrectas. Intenta con "admin" o "user" y contraseña "123".');
-            }
-        });
-        
-        document.getElementById('logoutButton').addEventListener('click', () => {
-             currentUser = null;
-             document.getElementById('email').value = '';
-             document.getElementById('password').value = '';
-             switchView('login');
-        });
-
-        // --- INICIALIZACIÓN DEL DASHBOARD ---
-        function initDashboard() {
-            const userNameEl = document.getElementById('userName');
-            const userRoleEl = document.getElementById('userRole');
-            const adminControls = document.getElementById('admin-controls');
-            const sidebarNav = document.getElementById('sidebarNav');
-
-            userNameEl.textContent = currentUser.name;
-            sidebarNav.innerHTML = ''; 
-
-            if (currentUser.role === 'admin') {
-                userRoleEl.textContent = "Administrador";
-                adminControls.classList.remove('hidden');
-                adminControls.classList.add('flex');
-                populateClientSelector();
-                
-                sidebarNav.innerHTML = `
-                    <a href="#" data-content="analytics" class="sidebar-link flex items-center px-4 py-2.5 rounded-md active"><i data-feather="bar-chart-2" class="w-5 h-5 mr-3"></i> Analítica</a>
-                    <a href="#" data-content="users" class="sidebar-link flex items-center px-4 py-2.5 rounded-md"><i data-feather="users" class="w-5 h-5 mr-3"></i> Gestión de Usuarios</a>
-                `;
-                
-                document.getElementById('client-select').addEventListener('change', (e) => {
-                    currentClient = e.target.value;
-                    renderAnalytics();
-                });
-
-                renderAnalytics();
-
-            } else { 
-                const clientData = mockData.clients[currentUser.clientId];
-                userRoleEl.textContent = clientData.name;
-                adminControls.classList.add('hidden');
-                
-                sidebarNav.innerHTML = `
-                    <a href="#" data-content="analytics" class="sidebar-link flex items-center px-4 py-2.5 rounded-md active"><i data-feather="bar-chart-2" class="w-5 h-5 mr-3"></i> Mis Mediciones</a>
-                    <a href="#" data-content="reports" class="sidebar-link flex items-center px-4 py-2.5 rounded-md"><i data-feather="file-text" class="w-5 h-5 mr-3"></i> Reportes</a>
-                    <a href="#" data-content="profile" class="sidebar-link flex items-center px-4 py-2.5 rounded-md"><i data-feather="settings" class="w-5 h-5 mr-3"></i> Mi Perfil</a>
-                `;
-                currentClient = currentUser.clientId;
-                renderAnalytics();
-            }
-
+        // --- INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
             feather.replace();
-            setupSidebarNavigation();
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('es-CL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        });
+
+        // --- AUTH ---
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            
+            const foundUser = DB.users.find(usr => usr.user === u && usr.pass === p);
+
+            if (foundUser) {
+                currentUser = foundUser;
+                // Si es superadmin, no tiene cliente asignado, por defecto ve el primero
+                currentClientContext = currentUser.role === ROLES.SUPERADMIN ? DB.clients[0].id : currentUser.clientId;
+                
+                initSystem();
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Credenciales incorrectas', confirmButtonColor: '#D4A24E' });
+            }
+        });
+
+        function logout() {
+            currentUser = null;
+            location.reload();
         }
 
-        function populateClientSelector() {
-            const select = document.getElementById('client-select');
-            select.innerHTML = '';
-            Object.keys(mockData.clients).forEach(clientId => {
-                const option = document.createElement('option');
-                option.value = clientId;
-                option.textContent = mockData.clients[clientId].name;
-                select.appendChild(option);
-            });
-            select.value = currentClient;
+        function initSystem() {
+            document.getElementById('view-login').classList.add('hidden');
+            const dash = document.getElementById('view-dashboard');
+            dash.classList.remove('hidden');
+            dash.classList.add('fade-in');
+
+            document.getElementById('sidebarUserName').textContent = currentUser.name;
+            let roleLabel = "";
+            switch(currentUser.role) {
+                case ROLES.SUPERADMIN: roleLabel = "Super Administrador"; break;
+                case ROLES.ADMIN: roleLabel = "Admin de Empresa"; break;
+                case ROLES.GERENTE: roleLabel = "Gerencia"; break;
+                case ROLES.USER: roleLabel = "Operaciones"; break;
+            }
+            document.getElementById('sidebarUserRole').textContent = roleLabel;
+            document.getElementById('userAvatar').textContent = currentUser.name.charAt(0);
+
+            setupSidebar();
+            setupHeader();
+            
+            // Cargar vista por defecto
+            if(currentUser.role === ROLES.SUPERADMIN) loadView('sa_overview');
+            else loadView('dashboard_live');
         }
-        
-        function setupSidebarNavigation() {
-            const links = document.querySelectorAll('.sidebar-link');
-            links.forEach(link => {
-                link.addEventListener('click', (e) => {
+
+        // --- SIDEBAR DINÁMICO ---
+        function setupSidebar() {
+            const menu = document.getElementById('sidebarMenu');
+            menu.innerHTML = '';
+
+            const createLink = (id, label, icon) => {
+                const a = document.createElement('a');
+                a.href = "#";
+                a.className = `flex items-center px-4 py-3 mb-1 text-sm font-medium text-gray-400 rounded-lg hover:bg-gray-800 hover:text-white transition-all group sidebar-link`;
+                a.dataset.view = id;
+                a.innerHTML = `<i data-feather="${icon}" class="w-5 h-5 mr-3 group-hover:text-[#D4A24E] transition-colors"></i> ${label}`;
+                a.onclick = (e) => {
                     e.preventDefault();
-                    links.forEach(l => l.classList.remove('active'));
-                    link.classList.add('active');
-                    const contentId = link.getAttribute('data-content');
-                    
-                    switch(contentId) {
-                        case 'analytics': renderAnalytics(); break;
-                        case 'users': renderUserManagement(); break;
-                        case 'reports': renderPlaceholder("Gestión de Reportes"); break;
-                        case 'profile': renderPlaceholder("Configuración de Perfil"); break;
-                    }
-                });
-            });
+                    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('sidebar-active'));
+                    a.classList.add('sidebar-active');
+                    loadView(id);
+                };
+                return a;
+            };
+
+            // SUPERADMIN MENU
+            if (currentUser.role === ROLES.SUPERADMIN) {
+                menu.appendChild(createLink('sa_overview', 'Gestión Global', 'globe'));
+                menu.appendChild(createLink('sa_clients', 'Clientes & Servicios', 'briefcase'));
+                menu.appendChild(createLink('sa_announcements', 'Anuncios', 'mic'));
+                menu.appendChild(document.createElement('hr')).className = "border-gray-700 my-4 mx-4";
+                menu.innerHTML += `<p class="px-4 text-xs uppercase text-gray-500 mb-2 font-bold">Vista Cliente</p>`;
+                menu.appendChild(createLink('dashboard_live', 'Monitoreo Planta', 'activity'));
+            }
+            // ADMIN & GERENTE MENU
+            else if ([ROLES.ADMIN, ROLES.GERENTE].includes(currentUser.role)) {
+                const client = DB.clients.find(c => c.id === currentClientContext);
+                if(client.services.liveMonitor) menu.appendChild(createLink('dashboard_live', 'Monitor en Vivo', 'activity'));
+                if(client.services.reports) menu.appendChild(createLink('dashboard_reports', 'Reportería Estática', 'file-text'));
+                
+                if(currentUser.role === ROLES.ADMIN) {
+                    menu.appendChild(document.createElement('hr')).className = "border-gray-700 my-4 mx-4";
+                    menu.appendChild(createLink('admin_users', 'Gestión Usuarios', 'users'));
+                    menu.appendChild(createLink('admin_settings', 'Configuración', 'settings'));
+                }
+            } 
+            // USER MENU
+            else {
+                const client = DB.clients.find(c => c.id === currentClientContext);
+                // Simulación de permisos
+                if(client.services.liveMonitor && currentUser.permissions.includes('dashboard1')) {
+                    menu.appendChild(createLink('dashboard_live', 'Cintas & Procesos', 'activity'));
+                }
+                 if(client.services.liveMonitor && currentUser.permissions.includes('dashboard2')) {
+                    menu.appendChild(createLink('dashboard_stock', 'Stockpiles', 'layers')); // Ejemplo
+                }
+            }
+            
+            feather.replace();
+            // Activar primero por defecto
+            const firstLink = menu.querySelector('a');
+            if(firstLink) firstLink.classList.add('sidebar-active');
         }
-        
-        function renderPlaceholder(title) {
-            document.getElementById('main-title').textContent = title;
-            dashboardContent.innerHTML = `
-                <div class="bg-gray-800 p-8 rounded-lg shadow-lg text-center border border-gray-700">
-                    <h2 class="text-xl font-semibold text-white">Próximamente</h2>
-                    <p class="text-gray-400 mt-2">Esta sección estará disponible en futuras actualizaciones.</p>
+
+        function setupHeader() {
+            if (currentUser.role === ROLES.SUPERADMIN) {
+                const container = document.getElementById('clientSelectorContainer');
+                const select = document.getElementById('globalClientSelect');
+                container.classList.remove('hidden');
+                container.classList.add('flex', 'items-center');
+                
+                select.innerHTML = '';
+                DB.clients.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.textContent = c.name;
+                    select.appendChild(opt);
+                });
+                select.value = currentClientContext;
+                
+                select.addEventListener('change', (e) => {
+                    currentClientContext = e.target.value;
+                    Swal.fire({
+                        title: 'Cambiando Contexto',
+                        text: `Visualizando datos de ${DB.clients.find(c=>c.id===currentClientContext).name}`,
+                        timer: 1000,
+                        showConfirmButton: false,
+                        background: '#1f2937',
+                        color: '#fff'
+                    }).then(() => {
+                        // Si estamos en una vista de dashboard, recargarla
+                        const activeView = document.querySelector('.sidebar-active').dataset.view;
+                        loadView(activeView);
+                    });
+                });
+            }
+            renderNotifications();
+        }
+
+        // --- ROUTER / VIEW LOADER ---
+        function loadView(viewId) {
+            const content = document.getElementById('mainContent');
+            const title = document.getElementById('pageTitle');
+            content.innerHTML = '';
+            
+            // Cleanup Charts
+            Object.values(chartsInstances).forEach(chart => chart.destroy());
+            chartsInstances = {};
+
+            // Check Access for Services
+            const client = DB.clients.find(c => c.id === currentClientContext);
+
+            switch(viewId) {
+                // --- VISTAS SUPERADMIN ---
+                case 'sa_overview':
+                    title.textContent = "Visión Global del Negocio";
+                    content.innerHTML = renderSuperAdminOverview();
+                    break;
+                case 'sa_clients':
+                    title.textContent = "Administración de Clientes";
+                    content.innerHTML = renderSuperAdminClients();
+                    break;
+                case 'sa_announcements':
+                    title.textContent = "Centro de Anuncios";
+                    content.innerHTML = renderAnnouncementsPanel();
+                    break;
+
+                // --- VISTAS OPERATIVAS ---
+                case 'dashboard_live':
+                    if(!client.services.liveMonitor) {
+                        content.innerHTML = renderLockedService('Monitoreo en Vivo');
+                        return;
+                    }
+                    title.textContent = `Monitoreo en Vivo - ${client.name}`;
+                    content.innerHTML = renderLiveDashboard();
+                    initLiveCharts();
+                    break;
+                
+                case 'dashboard_reports':
+                    if(!client.services.reports) {
+                        content.innerHTML = renderLockedService('Reportería');
+                        return;
+                    }
+                    title.textContent = "Reportes Históricos";
+                    content.innerHTML = renderReportsView();
+                    break;
+
+                case 'admin_users':
+                    title.textContent = "Gestión de Usuarios Locales";
+                    content.innerHTML = renderUserManagement();
+                    break;
+                
+                default:
+                    content.innerHTML = `<div class="text-center mt-20"><h3 class="text-xl text-gray-500">Seleccione una opción del menú</h3></div>`;
+            }
+            feather.replace();
+        }
+
+        // ================= RENDER FUNCTIONS =================
+
+        function renderLockedService(serviceName) {
+            return `
+                <div class="h-full flex flex-col items-center justify-center text-center opacity-0 fade-in" style="animation-fill-mode: forwards;">
+                    <div class="p-6 rounded-full bg-gray-800 mb-4">
+                        <i data-feather="lock" class="w-12 h-12 text-gray-500"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white mb-2">Servicio No Contratado</h2>
+                    <p class="text-gray-400 max-w-md">El módulo de <span class="text-[#D4A24E]">${serviceName}</span> no está habilitado para ${DB.clients.find(c=>c.id===currentClientContext).name}.</p>
+                    ${currentUser.role === ROLES.SUPERADMIN ? `<button onclick="loadView('sa_clients')" class="mt-6 px-6 py-2 bg-[#D4A24E] text-gray-900 rounded font-bold">Habilitar Ahora</button>` : ''}
                 </div>
             `;
         }
 
-        // --- RENDERIZADO DE CONTENIDO DEL DASHBOARD ---
-
-        function renderAnalytics() {
-            document.getElementById('main-title').textContent = "Monitoreo Integral Planta Lo Blanco";
-
-            dashboardContent.innerHTML = `
-                <section class="mb-10">
-                    <h2 class="text-xl font-semibold text-white flex items-center"><span class="text-2xl mr-2">🧭</span>Panel General — Planta Lo Blanco</h2>
-                    <p class="text-gray-400 mt-2">Vista panorámica del rendimiento operativo de la planta de áridos medida por Ingeglobal. Centraliza información de drones, sensores volumétricos y controladores industriales.</p>
-                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 mt-6">
-                        <div class="bg-gray-800 p-5 rounded-lg border border-gray-700 shadow-lg">
-                            <p class="text-sm text-gray-400">Producción diaria total</p>
-                            <p class="text-3xl font-bold text-white">${plantaLoBlanco.general.dailyProduction.toLocaleString('es-CL')} m³</p>
-                        </div>
-                        <div class="bg-gray-800 p-5 rounded-lg border border-gray-700 shadow-lg">
-                            <p class="text-sm text-gray-400">Producción semanal</p>
-                            <p class="text-3xl font-bold text-white">${plantaLoBlanco.general.weeklyProduction.toLocaleString('es-CL')} m³</p>
-                        </div>
-                        <div class="bg-gray-800 p-5 rounded-lg border border-gray-700 shadow-lg">
-                            <p class="text-sm text-gray-400">Producción mensual</p>
-                            <p class="text-3xl font-bold text-white">${plantaLoBlanco.general.monthlyProduction.toLocaleString('es-CL')} m³</p>
-                        </div>
-                        <div class="bg-gray-800 p-5 rounded-lg border border-gray-700 shadow-lg">
-                            <p class="text-sm text-gray-400">Eficiencia promedio planta</p>
-                            <p class="text-3xl font-bold text-green-400">${plantaLoBlanco.general.efficiency}%</p>
-                        </div>
-                        <div class="bg-gray-800 p-5 rounded-lg border border-gray-700 shadow-lg">
-                            <p class="text-sm text-gray-400">Alertas activas</p>
-                            <p class="text-3xl font-bold text-red-400">${plantaLoBlanco.general.alerts.length}</p>
-                            <ul class="mt-2 text-xs text-gray-400 space-y-1">
-                                ${plantaLoBlanco.general.alerts.map(alert => `<li class="flex items-start"><span class="text-red-500 mr-2">•</span>${alert}</li>`).join('')}
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="mb-10">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-white flex items-center"><span class="text-2xl mr-2">🪜</span>Dashboard 1 — Medición de Volumen en Cintas Transportadoras</h3>
-                        <span class="text-xs text-gray-500 uppercase tracking-wide">Actualización continua</span>
-                    </div>
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-2 bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-                                <div class="bg-gray-900/40 p-4 rounded-md">
-                                    <p class="text-xs text-gray-400">Arena</p>
-                                    <p class="text-2xl font-bold text-white">${plantaLoBlanco.dashboard1.flowRates.arena.toFixed(2)} m³/min</p>
-                                </div>
-                                <div class="bg-gray-900/40 p-4 rounded-md">
-                                    <p class="text-xs text-gray-400">Gravilla</p>
-                                    <p class="text-2xl font-bold text-white">${plantaLoBlanco.dashboard1.flowRates.gravilla.toFixed(2)} m³/min</p>
-                                </div>
-                                <div class="bg-gray-900/40 p-4 rounded-md">
-                                    <p class="text-xs text-gray-400">Grava</p>
-                                    <p class="text-2xl font-bold text-white">${plantaLoBlanco.dashboard1.flowRates.grava.toFixed(2)} m³/min</p>
-                                </div>
-                                <div class="bg-gray-900/40 p-4 rounded-md">
-                                    <p class="text-xs text-gray-400">Otros</p>
-                                    <p class="text-2xl font-bold text-white">${plantaLoBlanco.dashboard1.flowRates.otros.toFixed(2)} m³/min</p>
-                                </div>
+        function renderSuperAdminOverview() {
+            return `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 fade-in">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-[#D4A24E]">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-gray-400 text-sm">Clientes Totales</p>
+                                <h3 class="text-3xl font-bold text-white mt-1">${DB.clients.length}</h3>
                             </div>
-                            <div class="chart-container h-72"><canvas id="flowChart"></canvas></div>
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 text-sm text-gray-300">
-                                <div class="bg-gray-900/40 p-4 rounded-md">
-                                    <p class="text-xs text-gray-400">Acumulado horario</p>
-                                    <p class="text-xl font-semibold text-white">${plantaLoBlanco.dashboard1.accumulators.hourly.toLocaleString('es-CL')} m³</p>
-                                </div>
-                                <div class="bg-gray-900/40 p-4 rounded-md">
-                                    <p class="text-xs text-gray-400">Acumulado diario</p>
-                                    <p class="text-xl font-semibold text-white">${plantaLoBlanco.dashboard1.accumulators.daily.toLocaleString('es-CL')} m³</p>
-                                </div>
-                                <div class="bg-gray-900/40 p-4 rounded-md">
-                                    <p class="text-xs text-gray-400">Acumulado mensual</p>
-                                    <p class="text-xl font-semibold text-white">${plantaLoBlanco.dashboard1.accumulators.monthly.toLocaleString('es-CL')} m³</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
-                            <h4 class="text-md font-semibold text-white mb-4">Mapa de calor — Vibración y detenciones</h4>
-                            <div class="space-y-4">
-                                ${plantaLoBlanco.dashboard1.heatmap.map(item => `
-                                    <div class="p-4 rounded-md ${item.level} border border-gray-700/50">
-                                        <div class="flex items-center justify-between">
-                                            <span class="font-semibold text-white">${item.cinta}</span>
-                                            <span class="text-xs ${item.text}">${item.status}</span>
-                                        </div>
-                                        <p class="text-xs text-gray-400 mt-2">Sensores de vibración y temperatura monitoreando en tiempo real.</p>
-                                    </div>
-                                `).join('')}
-                            </div>
+                            <div class="p-2 bg-[#D4A24E]/20 rounded-lg"><i data-feather="briefcase" class="text-[#D4A24E]"></i></div>
                         </div>
                     </div>
-                </section>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-blue-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-gray-400 text-sm">Usuarios Sistema</p>
+                                <h3 class="text-3xl font-bold text-white mt-1">${DB.users.length}</h3>
+                            </div>
+                            <div class="p-2 bg-blue-500/20 rounded-lg"><i data-feather="users" class="text-blue-500"></i></div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-green-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-gray-400 text-sm">Estado Servidores</p>
+                                <h3 class="text-3xl font-bold text-green-400 mt-1">100%</h3>
+                            </div>
+                            <div class="p-2 bg-green-500/20 rounded-lg"><i data-feather="server" class="text-green-500"></i></div>
+                        </div>
+                    </div>
+                </div>
 
-                <section class="mb-10">
-                    <h3 class="text-lg font-semibold text-white flex items-center mb-4"><span class="text-2xl mr-2">🧱</span>Dashboard 2 — Medición de Volumen en Arcones</h3>
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-2 bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-sm">
-                                    <thead>
-                                        <tr class="text-left text-gray-400 border-b border-gray-700">
-                                            <th class="py-2">Arcon</th>
-                                            <th class="py-2">Volumen inicial</th>
-                                            <th class="py-2">Volumen final</th>
-                                            <th class="py-2">Consumo diario</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${plantaLoBlanco.dashboard2.arcones.map(arcon => `
-                                            <tr class="border-b border-gray-800 text-gray-200">
-                                                <td class="py-3 font-semibold">${arcon.id}</td>
-                                                <td class="py-3">${arcon.inicial.toLocaleString('es-CL')} m³</td>
-                                                <td class="py-3">${arcon.final.toLocaleString('es-CL')} m³</td>
-                                                <td class="py-3 text-[#D4A24E] font-medium">${arcon.consumo.toLocaleString('es-CL')} m³</td>
-                                            </tr>
-                                        `).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="chart-container h-64 mt-6"><canvas id="arconesChart"></canvas></div>
+                <div class="mt-8 glass-panel rounded-xl p-6 fade-in">
+                    <h3 class="text-lg font-semibold text-white mb-4">Actividad Reciente del Sistema</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center p-3 hover:bg-gray-800/50 rounded-lg transition">
+                            <div class="w-2 h-2 bg-green-500 rounded-full mr-4"></div>
+                            <p class="text-sm text-gray-300">Nuevo usuario creado en <span class="text-white font-semibold">Constructora Andina</span> por Admin.</p>
+                            <span class="ml-auto text-xs text-gray-500">Hace 10 min</span>
                         </div>
-                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg flex flex-col justify-between">
-                            <p class="text-gray-300 text-sm leading-relaxed">${plantaLoBlanco.dashboard2.reposicion}</p>
-                            <div class="mt-6 p-4 bg-gray-900/40 rounded-md text-xs text-gray-400">
-                                <p>Algoritmo de reposición sugiere órdenes automáticas cuando el volumen proyectado alcanza el 30% del stock inicial.</p>
-                            </div>
+                         <div class="flex items-center p-3 hover:bg-gray-800/50 rounded-lg transition">
+                            <div class="w-2 h-2 bg-[#D4A24E] rounded-full mr-4"></div>
+                            <p class="text-sm text-gray-300">Alerta de stock crítico reportada en <span class="text-white font-semibold">Minerals del Pacífico</span>.</p>
+                            <span class="ml-auto text-xs text-gray-500">Hace 45 min</span>
                         </div>
                     </div>
-                </section>
-
-                <section class="mb-10">
-                    <h3 class="text-lg font-semibold text-white flex items-center mb-4"><span class="text-2xl mr-2">🚛</span>Dashboard 3 — Control de Transporte de Material</h3>
-                    <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
-                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
-                            <p class="text-sm text-gray-400">Camiones operativos</p>
-                            <p class="text-3xl font-bold text-white">${plantaLoBlanco.dashboard3.operationalTrucks}</p>
-                        </div>
-                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
-                            <p class="text-sm text-gray-400">Viajes diarios promedio</p>
-                            <p class="text-3xl font-bold text-white">${plantaLoBlanco.dashboard3.averageTrips}</p>
-                        </div>
-                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
-                            <p class="text-sm text-gray-400">Toneladas transportadas (día)</p>
-                            <p class="text-3xl font-bold text-white">${plantaLoBlanco.dashboard3.dailyTonnage.toLocaleString('es-CL')} t</p>
-                        </div>
-                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
-                            <p class="text-sm text-gray-400">Empresas registradas</p>
-                            <p class="text-sm font-semibold text-[#D4A24E]">${plantaLoBlanco.dashboard3.companies.join(', ')}</p>
-                        </div>
-                    </div>
-                    <div class="mt-6 bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="md:col-span-2">
-                            <h4 class="text-md font-semibold text-white">Detalle de camión destacado</h4>
-                            <ul class="mt-4 text-sm text-gray-300 space-y-2">
-                                <li><span class="text-gray-400">Patente:</span> ${plantaLoBlanco.dashboard3.highlightedTruck.plate}</li>
-                                <li><span class="text-gray-400">Material:</span> ${plantaLoBlanco.dashboard3.highlightedTruck.material}</li>
-                                <li><span class="text-gray-400">Capacidad:</span> ${plantaLoBlanco.dashboard3.highlightedTruck.capacity} m³</li>
-                                <li><span class="text-gray-400">Vueltas hoy:</span> ${plantaLoBlanco.dashboard3.highlightedTruck.dailyRuns}</li>
-                                <li><span class="text-gray-400">Transporte acumulado semanal:</span> ${plantaLoBlanco.dashboard3.highlightedTruck.weeklyVolume.toLocaleString('es-CL')} m³</li>
-                            </ul>
-                        </div>
-                        <div class="bg-gray-900/40 rounded-lg p-4 flex flex-col items-center justify-center text-center">
-                            <div class="w-20 h-20 bg-gray-700 rounded-full mb-4 flex items-center justify-center">
-                                <i data-feather="activity" class="w-10 h-10 text-[#D4A24E]"></i>
-                            </div>
-                            <p class="text-sm text-gray-400">Tarjetas por camión con indicador de rendimiento individual y acceso a fotografías de tolva inspeccionadas por IA.</p>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="mb-10">
-                    <h3 class="text-lg font-semibold text-white flex items-center mb-4"><span class="text-2xl mr-2">⚙️</span>Dashboard 4 — Monitoreo de Buzón Alimentador</h3>
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                <div class="bg-gray-900/40 p-4 rounded-md">
-                                    <p class="text-xs text-gray-400">Volumen alimentado diario</p>
-                                    <p class="text-2xl font-bold text-white">${plantaLoBlanco.dashboard4.dailyVolume.toLocaleString('es-CL')} m³</p>
-                                </div>
-                                <div class="bg-gray-900/40 p-4 rounded-md">
-                                    <p class="text-xs text-gray-400">Consumo por minuto</p>
-                                    <p class="text-2xl font-bold text-white">${plantaLoBlanco.dashboard4.perMinute.toFixed(2)} m³/min</p>
-                                </div>
-                                <div class="bg-gray-900/40 p-4 rounded-md">
-                                    <p class="text-xs text-gray-400">Promedio semanal</p>
-                                    <p class="text-2xl font-bold text-white">${plantaLoBlanco.dashboard4.weeklyAverage.toLocaleString('es-CL')} m³</p>
-                                </div>
-                            </div>
-                            <div class="mt-6">
-                                <h4 class="text-sm font-semibold text-white mb-2">Anomalías detectadas</h4>
-                                <ul class="text-xs text-yellow-400 space-y-1">
-                                    ${plantaLoBlanco.dashboard4.anomalies.map(anomaly => `<li class="flex items-start"><span class="mr-2">•</span>${anomaly}</li>`).join('')}
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
-                            <h4 class="text-md font-semibold text-white mb-4">Composición por tipo de árido</h4>
-                            <div class="chart-container h-64"><canvas id="buzonPieChart"></canvas></div>
-                        </div>
-                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
-                            <h4 class="text-md font-semibold text-white mb-4">Rendimiento horario</h4>
-                            <div class="chart-container h-64"><canvas id="buzonTrendChart"></canvas></div>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="mb-10">
-                    <h3 class="text-lg font-semibold text-white flex items-center mb-4"><span class="text-2xl mr-2">🗻</span>Dashboard 5 — Monitoreo Volumétrico de Acopios</h3>
-                    <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm">
-                                <thead>
-                                    <tr class="text-gray-400 border-b border-gray-700">
-                                        <th class="py-2">#</th>
-                                        <th class="py-2">Producto</th>
-                                        <th class="py-2">Cota Piso (m)</th>
-                                        <th class="py-2">Volumen (m³)</th>
-                                        <th class="py-2">Variación mensual</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${plantaLoBlanco.dashboard5.stockpiles.map((stockpile, index) => `
-                                        <tr class="border-b border-gray-800 text-gray-200">
-                                            <td class="py-3">${index + 1}</td>
-                                            <td class="py-3 font-semibold">${stockpile.producto}</td>
-                                            <td class="py-3">${stockpile.cota}</td>
-                                            <td class="py-3">${stockpile.volumen.toLocaleString('es-CL')}</td>
-                                            <td class="py-3 ${stockpile.variacion > 0 ? 'text-green-400' : stockpile.variacion < 0 ? 'text-red-400' : 'text-gray-300'}">${stockpile.variacion > 0 ? '+' : ''}${stockpile.variacion}%</td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-300">
-                            ${plantaLoBlanco.dashboard5.notes.map(note => `<div class="bg-gray-900/40 p-4 rounded-md">${note}</div>`).join('')}
-                        </div>
-                    </div>
-                </section>
-
-                <section class="mb-10">
-                    <h3 class="text-lg font-semibold text-white flex items-center mb-4"><span class="text-2xl mr-2">🌐</span>Dashboard 6 — Reporte Ejecutivo</h3>
-                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
-                            <p class="text-sm text-gray-400">Producción total mes</p>
-                            <p class="text-3xl font-bold text-white">${plantaLoBlanco.dashboard6.monthlyProduction.toLocaleString('es-CL')} m³</p>
-                        </div>
-                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
-                            <p class="text-sm text-gray-400">Ingresos proyectados</p>
-                            <p class="text-3xl font-bold text-white">$${plantaLoBlanco.dashboard6.projectedRevenue.toLocaleString('es-CL')}</p>
-                        </div>
-                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
-                            <p class="text-sm text-gray-400">Costo operativo promedio</p>
-                            <p class="text-3xl font-bold text-white">$${plantaLoBlanco.dashboard6.averageCost.toLocaleString('es-CL')}/m³</p>
-                        </div>
-                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
-                            <p class="text-sm text-gray-400">Margen operativo</p>
-                            <p class="text-3xl font-bold text-green-400">${plantaLoBlanco.dashboard6.operatingMargin}%</p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
-                            <p class="text-sm text-gray-400">Dron activo</p>
-                            <p class="text-sm font-semibold text-white">${plantaLoBlanco.dashboard6.droneStatus}</p>
-                        </div>
-                        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
-                            <p class="text-sm text-gray-400">Sensores en línea</p>
-                            <p class="text-2xl font-bold text-white">${plantaLoBlanco.dashboard6.sensorsOnline.active}/${plantaLoBlanco.dashboard6.sensorsOnline.total}</p>
-                            <p class="text-xs text-gray-500 mt-2">Integración SCADA + IoT para seguimiento de disponibilidad.</p>
-                        </div>
-                    </div>
-                </section>
+                </div>
             `;
+        }
 
-            if (mainChart) mainChart.destroy();
-            if (arconesChart) arconesChart.destroy();
-            if (buzonPieChart) buzonPieChart.destroy();
-            if (buzonTrendChart) buzonTrendChart.destroy();
+        function renderSuperAdminClients() {
+            return `
+                <div class="glass-panel rounded-xl overflow-hidden fade-in">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-800/50 text-gray-400 text-xs uppercase tracking-wider">
+                                <th class="p-4">Cliente</th>
+                                <th class="p-4 text-center">Live Monitor</th>
+                                <th class="p-4 text-center">Reportería</th>
+                                <th class="p-4 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-700">
+                            ${DB.clients.map(c => `
+                                <tr class="hover:bg-gray-800/30 transition">
+                                    <td class="p-4 font-medium text-white flex items-center">
+                                        <div class="w-8 h-8 rounded bg-gray-700 flex items-center justify-center mr-3 text-xs">${c.id.substring(2,4).toUpperCase()}</div>
+                                        ${c.name}
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <button onclick="toggleService('${c.id}', 'liveMonitor')" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${c.services.liveMonitor ? 'bg-[#D4A24E]' : 'bg-gray-600'}">
+                                            <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${c.services.liveMonitor ? 'translate-x-6' : 'translate-x-1'}"></span>
+                                        </button>
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <button onclick="toggleService('${c.id}', 'reports')" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${c.services.reports ? 'bg-[#D4A24E]' : 'bg-gray-600'}">
+                                            <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${c.services.reports ? 'translate-x-6' : 'translate-x-1'}"></span>
+                                        </button>
+                                    </td>
+                                    <td class="p-4 text-right">
+                                        <button class="text-gray-400 hover:text-white"><i data-feather="settings" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    <div class="p-4 bg-gray-800/30 border-t border-gray-700">
+                        <button onclick="Swal.fire('Funcionalidad Demo', 'Aquí se abriría el modal de crear cliente', 'info')" class="text-sm text-[#D4A24E] font-semibold hover:underline flex items-center">
+                            <i data-feather="plus" class="w-4 h-4 mr-2"></i> Agregar Nuevo Cliente
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
 
-            const flowCtx = document.getElementById('flowChart').getContext('2d');
-            const flowDatasets = Object.entries(plantaLoBlanco.dashboard1.lineChart.datasets).map(([label, data], index) => {
-                const colors = ['#D4A24E', '#60A5FA', '#A855F7', '#34D399'];
-                return {
-                    label,
-                    data,
-                    borderColor: colors[index % colors.length],
-                    backgroundColor: `${colors[index % colors.length]}33`,
-                    tension: 0.35,
-                    fill: false,
-                    pointRadius: 3,
-                    pointHoverRadius: 5
-                };
-            });
-            mainChart = new Chart(flowCtx, {
+        function renderLiveDashboard() {
+            // Banner de Anuncios Globales o Locales
+            const announcements = DB.announcements.filter(a => a.target === 'global' || a.target === currentClientContext);
+            let bannerHtml = '';
+            if(announcements.length > 0) {
+                bannerHtml = `
+                    <div class="bg-gradient-to-r from-[#D4A24E]/20 to-transparent border-l-4 border-[#D4A24E] p-4 mb-6 rounded-r-lg flex items-start fade-in">
+                        <i data-feather="info" class="text-[#D4A24E] mt-1 mr-3 flex-shrink-0"></i>
+                        <div>
+                            <h4 class="text-[#D4A24E] font-bold text-sm">Anuncio Importante</h4>
+                            <p class="text-sm text-gray-300">${announcements[0].text}</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                ${bannerHtml}
+                
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8 fade-in">
+                    <div class="glass-panel p-5 rounded-xl relative overflow-hidden group">
+                        <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition"><i data-feather="box" class="w-16 h-16 text-white"></i></div>
+                        <p class="text-gray-400 text-xs uppercase font-semibold">Producción Hoy</p>
+                        <h3 class="text-3xl font-bold text-white mt-1">${PLANT_DATA.general.prod.toLocaleString()} m³</h3>
+                        <p class="text-xs text-green-400 mt-2 flex items-center"><i data-feather="trending-up" class="w-3 h-3 mr-1"></i> +4.5% vs ayer</p>
+                    </div>
+                    <div class="glass-panel p-5 rounded-xl relative overflow-hidden group">
+                        <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition"><i data-feather="activity" class="w-16 h-16 text-white"></i></div>
+                        <p class="text-gray-400 text-xs uppercase font-semibold">Eficiencia Planta</p>
+                        <h3 class="text-3xl font-bold text-white mt-1">${PLANT_DATA.general.eff}%</h3>
+                        <div class="w-full bg-gray-700 h-1.5 rounded-full mt-3 overflow-hidden">
+                            <div class="bg-[#D4A24E] h-full rounded-full" style="width: 92%"></div>
+                        </div>
+                    </div>
+                     <div class="glass-panel p-5 rounded-xl relative overflow-hidden group">
+                        <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition"><i data-feather="alert-triangle" class="w-16 h-16 text-white"></i></div>
+                        <p class="text-gray-400 text-xs uppercase font-semibold">Alertas Activas</p>
+                        <h3 class="text-3xl font-bold text-red-400 mt-1">${PLANT_DATA.general.alerts}</h3>
+                        <p class="text-xs text-gray-500 mt-2">Requiere atención</p>
+                    </div>
+                     <div class="glass-panel p-0 rounded-xl relative overflow-hidden bg-black flex items-center justify-center border border-red-500/30">
+                        <div class="absolute top-2 left-2 flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                            <span class="text-[10px] text-white font-bold bg-black/50 px-1 rounded">LIVE CAM 01</span>
+                        </div>
+                        <img src="https://images.unsplash.com/photo-1581092921461-eab62e97a783?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="w-full h-full object-cover opacity-60">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 fade-in delay-100">
+                    <div class="lg:col-span-2 glass-panel p-6 rounded-xl">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-semibold text-white">Flujo de Material en Cintas</h3>
+                            <div class="flex space-x-2">
+                                <span class="w-3 h-3 rounded-full bg-[#D4A24E]"></span><span class="text-xs text-gray-400">Arena</span>
+                            </div>
+                        </div>
+                        <div class="h-72 w-full">
+                            <canvas id="liveChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="font-semibold text-white mb-4">Estado de Equipos</h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+                                <div class="flex items-center">
+                                    <i data-feather="check-circle" class="text-green-500 w-5 h-5 mr-3"></i>
+                                    <span class="text-sm font-medium text-gray-200">Chancador Primario</span>
+                                </div>
+                                <span class="text-xs text-green-400 font-bold">ONLINE</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                                <div class="flex items-center">
+                                    <i data-feather="alert-circle" class="text-yellow-500 w-5 h-5 mr-3"></i>
+                                    <span class="text-sm font-medium text-gray-200">Cinta Transportadora 3</span>
+                                </div>
+                                <span class="text-xs text-yellow-400 font-bold">VIBRACIÓN</span>
+                            </div>
+                             <div class="flex justify-between items-center p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+                                <div class="flex items-center">
+                                    <i data-feather="check-circle" class="text-green-500 w-5 h-5 mr-3"></i>
+                                    <span class="text-sm font-medium text-gray-200">Harnero Secundario</span>
+                                </div>
+                                <span class="text-xs text-green-400 font-bold">ONLINE</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderUserManagement() {
+            const users = DB.users.filter(u => u.clientId === currentClientContext);
+            
+            return `
+                <div class="glass-panel rounded-xl p-6 fade-in">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-bold text-white">Usuarios de ${DB.clients.find(c=>c.id===currentClientContext).name}</h3>
+                        <button onclick="Swal.fire('Demo', 'Crear usuario', 'info')" class="bg-[#D4A24E] text-gray-900 px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#E4B56E] transition">
+                            + Nuevo Usuario
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-800 text-gray-400">
+                                <tr>
+                                    <th class="p-3 rounded-l-lg">Nombre</th>
+                                    <th class="p-3">Rol</th>
+                                    <th class="p-3">Acceso</th>
+                                    <th class="p-3 text-right rounded-r-lg">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-700">
+                                ${users.map(u => `
+                                    <tr class="group hover:bg-gray-800/50 transition">
+                                        <td class="p-3 text-white font-medium">${u.name}</td>
+                                        <td class="p-3 text-gray-300 capitalize">${u.role}</td>
+                                        <td class="p-3">
+                                            ${u.role === ROLES.USER 
+                                                ? `<span class="bg-blue-900 text-blue-300 px-2 py-1 rounded text-xs">Limitado</span>` 
+                                                : `<span class="bg-green-900 text-green-300 px-2 py-1 rounded text-xs">Total</span>`}
+                                        </td>
+                                        <td class="p-3 text-right opacity-0 group-hover:opacity-100 transition">
+                                            <button class="text-gray-400 hover:text-white mx-1"><i data-feather="edit-2" class="w-4 h-4"></i></button>
+                                            <button class="text-red-400 hover:text-red-300 mx-1"><i data-feather="trash" class="w-4 h-4"></i></button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAnnouncementsPanel() {
+            return `
+                <div class="glass-panel p-6 rounded-xl fade-in">
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-400 mb-2">Crear Nuevo Anuncio</label>
+                        <textarea class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white focus:border-[#D4A24E] outline-none" rows="3" placeholder="Escribe el mensaje aquí..."></textarea>
+                        <div class="flex justify-between items-center mt-3">
+                            <select class="bg-gray-800 border border-gray-700 text-gray-300 text-sm rounded p-2">
+                                <option value="global">Global (Todos los clientes)</option>
+                                ${DB.clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+                            </select>
+                            <button onclick="Swal.fire('Enviado', 'El anuncio ha sido publicado', 'success')" class="bg-[#D4A24E] text-gray-900 px-6 py-2 rounded font-bold text-sm hover:bg-[#E4B56E]">Publicar</button>
+                        </div>
+                    </div>
+                    <hr class="border-gray-700 my-6">
+                    <h4 class="text-white font-semibold mb-4">Historial</h4>
+                    <div class="space-y-3">
+                        ${DB.announcements.map(a => `
+                            <div class="bg-gray-800 p-4 rounded-lg border-l-4 ${a.target === 'global' ? 'border-blue-500' : 'border-gray-500'}">
+                                <div class="flex justify-between">
+                                    <p class="text-white font-medium text-sm">${a.text}</p>
+                                    <span class="text-xs text-gray-500">${a.date}</span>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1 uppercase">Destino: ${a.target === 'global' ? 'Todos' : a.target}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderReportsView() {
+            return `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 fade-in">
+                    <div class="glass-panel p-6 rounded-xl flex items-center justify-between cursor-pointer hover:bg-gray-800 transition">
+                        <div class="flex items-center">
+                            <div class="p-4 bg-red-500/10 rounded-lg text-red-500 mr-4"><i data-feather="file-text"></i></div>
+                            <div>
+                                <h4 class="text-white font-bold">Reporte Mensual Octubre</h4>
+                                <p class="text-sm text-gray-400">PDF - 2.4 MB</p>
+                            </div>
+                        </div>
+                        <i data-feather="download" class="text-gray-500"></i>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl flex items-center justify-between cursor-pointer hover:bg-gray-800 transition">
+                        <div class="flex items-center">
+                            <div class="p-4 bg-red-500/10 rounded-lg text-red-500 mr-4"><i data-feather="file-text"></i></div>
+                            <div>
+                                <h4 class="text-white font-bold">Certificado de Calibración</h4>
+                                <p class="text-sm text-gray-400">PDF - 1.1 MB</p>
+                            </div>
+                        </div>
+                        <i data-feather="download" class="text-gray-500"></i>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- LOGIC HELPERS ---
+        function toggleService(clientId, service) {
+            const client = DB.clients.find(c => c.id === clientId);
+            client.services[service] = !client.services[service];
+            loadView('sa_clients'); // Re-render
+            
+            const status = client.services[service] ? 'Activado' : 'Desactivado';
+            const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true });
+            Toast.fire({ icon: 'success', title: `${service === 'liveMonitor' ? 'Monitoreo' : 'Reportes'} ${status}` });
+        }
+
+        function renderNotifications() {
+            const list = document.getElementById('notificationList');
+            const badge = document.getElementById('notifBadge');
+            const relevant = DB.announcements.filter(a => a.target === 'global' || a.target === currentClientContext);
+            
+            if(relevant.length > 0) {
+                badge.classList.remove('hidden');
+                list.innerHTML = relevant.map(a => `
+                    <div class="bg-gray-700/50 p-2 rounded border-l-2 border-[#D4A24E]">
+                        <p class="text-xs text-white">${a.text}</p>
+                        <span class="text-[10px] text-gray-400">${a.date}</span>
+                    </div>
+                `).join('');
+            } else {
+                badge.classList.add('hidden');
+                list.innerHTML = '<p class="text-center text-gray-500 text-sm py-2">Sin novedades.</p>';
+            }
+        }
+
+        function initLiveCharts() {
+            const ctx = document.getElementById('liveChart');
+            if(!ctx) return;
+            
+            const chart = new Chart(ctx.getContext('2d'), {
                 type: 'line',
                 data: {
-                    labels: plantaLoBlanco.dashboard1.lineChart.labels,
-                    datasets: flowDatasets
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#D1D5DB' } } },
-                    scales: {
-                        x: {
-                            ticks: { color: 'rgba(209, 213, 219, 0.8)' },
-                            grid: { color: 'rgba(75, 85, 99, 0.3)' }
-                        },
-                        y: {
-                            ticks: { color: 'rgba(209, 213, 219, 0.8)' },
-                            grid: { color: 'rgba(75, 85, 99, 0.3)' }
-                        }
-                    }
-                }
-            });
-
-            const arconesCtx = document.getElementById('arconesChart').getContext('2d');
-            arconesChart = new Chart(arconesCtx, {
-                type: 'bar',
-                data: {
-                    labels: plantaLoBlanco.dashboard2.arcones.map(a => a.id),
-                    datasets: [
-                        {
-                            label: 'Volumen inicial',
-                            data: plantaLoBlanco.dashboard2.arcones.map(a => a.inicial),
-                            backgroundColor: 'rgba(96, 165, 250, 0.6)'
-                        },
-                        {
-                            label: 'Volumen final',
-                            data: plantaLoBlanco.dashboard2.arcones.map(a => a.final),
-                            backgroundColor: 'rgba(212, 162, 78, 0.7)'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#D1D5DB' } } },
-                    scales: {
-                        x: {
-                            ticks: { color: 'rgba(209, 213, 219, 0.8)' },
-                            grid: { color: 'rgba(75, 85, 99, 0.2)' }
-                        },
-                        y: {
-                            ticks: { color: 'rgba(209, 213, 219, 0.8)' },
-                            grid: { color: 'rgba(75, 85, 99, 0.2)' }
-                        }
-                    }
-                }
-            });
-
-            const buzonPieCtx = document.getElementById('buzonPieChart').getContext('2d');
-            buzonPieChart = new Chart(buzonPieCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: plantaLoBlanco.dashboard4.composition.labels,
+                    labels: PLANT_DATA.charts.labels,
                     datasets: [{
-                        data: plantaLoBlanco.dashboard4.composition.values,
-                        backgroundColor: ['#F59E0B', '#3B82F6', '#6B7280'],
-                        borderColor: '#1F2937'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#D1D5DB' } } }
-                }
-            });
-
-            const buzonTrendCtx = document.getElementById('buzonTrendChart').getContext('2d');
-            buzonTrendChart = new Chart(buzonTrendCtx, {
-                type: 'line',
-                data: {
-                    labels: plantaLoBlanco.dashboard4.hourlyPerformance.labels,
-                    datasets: [{
-                        label: 'm³/min',
-                        data: plantaLoBlanco.dashboard4.hourlyPerformance.values,
-                        borderColor: '#34D399',
-                        backgroundColor: 'rgba(52, 211, 153, 0.2)',
+                        label: 'Flujo (m³/min)',
+                        data: PLANT_DATA.charts.flow,
+                        borderColor: '#D4A24E',
+                        backgroundColor: (context) => {
+                            const ctx = context.chart.ctx;
+                            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+                            gradient.addColorStop(0, 'rgba(212, 162, 78, 0.5)');
+                            gradient.addColorStop(1, 'rgba(212, 162, 78, 0)');
+                            return gradient;
+                        },
                         fill: true,
                         tension: 0.4,
-                        pointRadius: 3,
-                        pointHoverRadius: 5
+                        pointRadius: 4,
+                        pointBackgroundColor: '#111827',
+                        pointBorderColor: '#D4A24E',
+                        pointBorderWidth: 2
                     }]
                 },
                 options: {
@@ -826,75 +773,14 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        x: {
-                            ticks: { color: 'rgba(209, 213, 219, 0.8)' },
-                            grid: { color: 'rgba(75, 85, 99, 0.2)' }
-                        },
-                        y: {
-                            ticks: { color: 'rgba(209, 213, 219, 0.8)' },
-                            grid: { color: 'rgba(75, 85, 99, 0.2)' }
-                        }
+                        x: { grid: { display: false, color: '#374151' }, ticks: { color: '#9CA3AF' } },
+                        y: { grid: { color: 'rgba(55, 65, 81, 0.5)' }, ticks: { color: '#9CA3AF' } }
                     }
                 }
             });
-
-            feather.replace();
+            chartsInstances['liveChart'] = chart;
         }
-
-        function renderUserManagement() {
-            const client = mockData.clients[currentClient];
-            if (!client) return;
-
-            document.getElementById('main-title').textContent = `Usuarios de ${client.name}`;
-            dashboardContent.innerHTML = `
-                <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700">
-                    <div class="p-6 border-b border-gray-700 flex justify-between items-center">
-                        <h3 class="text-lg font-semibold text-white">Listado de Usuarios</h3>
-                        <button class="bg-[#D4A24E] text-gray-900 px-4 py-2 rounded-md font-semibold hover:bg-[#E4B56E] btn flex items-center">
-                           <i data-feather="plus" class="w-4 h-4 mr-2"></i> Agregar Usuario
-                        </button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full table">
-                            <thead class="bg-gray-700/50">
-                                <tr>
-                                    <th class="text-gray-400">Nombre</th>
-                                    <th class="text-gray-400">Email</th>
-                                    <th class="text-gray-400">Estado</th>
-                                    <th class="text-gray-400">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="users-table-body" class="divide-y divide-gray-700"></tbody>
-                        </table>
-                    </div>
-                </div>
-            `;
-            const usersTableBody = document.getElementById('users-table-body');
-            usersTableBody.innerHTML = client.users.map(user => `
-                <tr class="hover:bg-gray-700/50">
-                    <td class="text-white">${user.name}</td>
-                    <td>${user.email}</td>
-                    <td>
-                        <span class="px-3 py-1 text-xs font-medium rounded-full ${user.active ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}">
-                            ${user.active ? 'Activo' : 'Inactivo'}
-                        </span>
-                    </td>
-                    <td class="flex items-center space-x-2 py-4">
-                        <button title="Editar" class="text-gray-500 hover:text-[#D4A24E]"><i data-feather="edit-2" class="w-5 h-5"></i></button>
-                        <button title="${user.active ? 'Desactivar' : 'Activar'}" class="text-gray-500 ${user.active ? 'hover:text-red-500' : 'hover:text-green-500'}">
-                            ${user.active ? '<i data-feather="toggle-left" class="w-5 h-5"></i>' : '<i data-feather="toggle-right" class="w-5 h-5"></i>'}
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-
-            feather.replace();
-        }
-
-        // --- INICIALIZACIÓN GENERAL ---
-        feather.replace();
 
     </script>
 </body>
 </html>
-
