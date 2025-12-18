@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/mockApi';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import MetricCard from '../components/common/MetricCard';
 import { Activity, Database, Truck, Layers } from 'lucide-react';
 import { Link } from 'react-router-dom';
