@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, Database, Truck, Layers, Settings, LogOut } from 'lucide-react';
+import { Activity, Database, Truck, Layers, Settings, LogOut, Lock, Users, Briefcase, Key } from 'lucide-react';
 import { useAuth, ROLES } from '../context/AuthContext';
 import AIAvatar from '../components/common/AIAvatar';
 
 const MenuPage = () => {
   const { user, logout } = useAuth();
+  const [showTooltip, setShowTooltip] = useState(null);
+
+  const contracted = user?.contractedModules || []; // List of contracted modules
 
   const MENU_ITEMS = [
     { 
@@ -43,13 +46,19 @@ const MenuPage = () => {
       color: 'text-emerald-400', 
       bg: 'bg-emerald-500/10',
       border: 'border-emerald-500/20'
+    },
+    { 
+      id: 'acopios', 
+      label: 'Acopios', 
+      icon: Database, 
+      path: '/acopios',
+      color: 'text-orange-400', 
+      bg: 'bg-orange-500/10',
+      border: 'border-orange-500/20'
     }
   ];
 
-  // Filter items if needed based on role (though user said "oculten si no tiene permiso")
-  // For now, all roles see these 4 modules, but maybe specific actions inside are restricted.
-  // The prompt says: "Operario: Visión restringida... Asegúrate de que los elementos del menú se oculten... si el usuario no tiene permiso"
-  // Assuming these 4 are basic operational modules. If Supervisor only sees "Settings", I'll add that separately.
+  const isDisabled = (moduleId) => !contracted.includes(moduleId) && user?.role !== ROLES.SUPERADMIN; // Superadmin bypassed
 
   return (
     <div className="min-h-screen bg-brand-dark relative overflow-hidden flex flex-col items-center justify-center p-6">
@@ -72,51 +81,98 @@ const MenuPage = () => {
             </button>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {MENU_ITEMS.map((item) => (
-            <Link 
-              key={item.id} 
-              to={item.path}
-              className="group relative"
-            >
-              <div className={`
-                glass-panel h-64 rounded-2xl p-6 flex flex-col items-center justify-center 
-                transition-all duration-300 transform group-hover:-translate-y-2 group-hover:shadow-2xl
-                border border-white/5 hover:border-white/20
-                relative overflow-hidden
-              `}>
-                <div className={`
-                  w-24 h-24 rounded-full flex items-center justify-center mb-6 
-                  ${item.bg} border ${item.border}
-                  group-hover:scale-110 transition-transform duration-300
-                `}>
-                  <item.icon className={`w-10 h-10 ${item.color}`} />
-                </div>
-                
-                <h3 className="text-xl font-bold text-white tracking-wide">{item.label}</h3>
-                
-                <div className="absolute bottom-4 opacity-0 group-hover:opacity-100 transition-opacity text-xs text-gray-400 font-mono">
-                   ENTRAR &rarr;
-                </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+          {MENU_ITEMS.map((item) => {
+            const disabled = isDisabled(item.id);
+
+            return (
+              <div key={item.id} className="group relative">
+                {disabled ? (
+                  /* Disabled Card */
+                  <div className="glass-panel h-64 rounded-2xl p-6 flex flex-col items-center justify-center border border-white/5 opacity-50 relative cursor-not-allowed grayscale">
+                     <div className="absolute top-3 right-3 text-gray-500">
+                        <Lock size={20} />
+                     </div>
+                     <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6 bg-gray-800 border border-gray-700">
+                        <item.icon className="w-8 h-8 text-gray-500" />
+                     </div>
+                     <h3 className="text-lg font-bold text-gray-500 tracking-wide">{item.label}</h3>
+                     <span className="px-2 py-0.5 rounded-full bg-gray-800 text-gray-500 text-[10px] uppercase font-bold mt-2">No Contratado</span>
+                  </div>
+                ) : (
+                  /* Active Link */
+                  <Link to={item.path}>
+                    <div className={`
+                      glass-panel h-64 rounded-2xl p-6 flex flex-col items-center justify-center 
+                      transition-all duration-300 transform group-hover:-translate-y-2 group-hover:shadow-2xl
+                      border border-white/5 hover:border-white/20 relative overflow-hidden
+                    `}>
+                      <div className={`
+                        w-20 h-20 rounded-full flex items-center justify-center mb-6 
+                        ${item.bg} border ${item.border}
+                        group-hover:scale-110 transition-transform duration-300
+                      `}>
+                        <item.icon className={`w-10 h-10 ${item.color}`} />
+                      </div>
+                      
+                      <h3 className="text-xl font-bold text-white tracking-wide">{item.label}</h3>
+                      
+                      <div className="absolute bottom-4 opacity-0 group-hover:opacity-100 transition-opacity text-xs text-gray-400 font-mono">
+                         ENTRAR &rarr;
+                      </div>
+                    </div>
+                  </Link>
+                )}
               </div>
-            </Link>
-          ))}
+            );
+          })}
         </div>
 
-        {/* Global Settings for Superadmin only */}
+        {/* Admin Management Section */}
         {user?.role === ROLES.SUPERADMIN && (
-           <div className="mt-12 flex justify-center">
-              <button className="flex items-center space-x-2 px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-colors text-gray-300">
-                <Settings size={20} />
-                <span>Configuración Global</span>
-              </button>
+           <div className="mt-16 border-t border-white/10 pt-8">
+              <h3 className="text-white font-bold mb-6 flex items-center">
+                 <Settings className="w-5 h-5 mr-2 text-brand-gold" />
+                 Panel de Administración
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <Link to="/admin" className="flex items-center p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-colors group">
+                     <div className="p-3 bg-blue-500/10 rounded-lg mr-4 group-hover:bg-blue-500/20">
+                        <Users className="text-blue-400" size={24} />
+                     </div>
+                     <div className="text-left">
+                        <p className="font-bold text-white">Usuarios</p>
+                        <p className="text-xs text-gray-500">Gestionar accesos</p>
+                     </div>
+                  </Link>
+
+                  <Link to="/admin" className="flex items-center p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-colors group">
+                     <div className="p-3 bg-purple-500/10 rounded-lg mr-4 group-hover:bg-purple-500/20">
+                        <Briefcase className="text-purple-400" size={24} />
+                     </div>
+                     <div className="text-left">
+                        <p className="font-bold text-white">Clientes</p>
+                        <p className="text-xs text-gray-500">Contratos y módulos</p>
+                     </div>
+                  </Link>
+
+                  <Link to="/admin" className="flex items-center p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-colors group">
+                     <div className="p-3 bg-emerald-500/10 rounded-lg mr-4 group-hover:bg-emerald-500/20">
+                        <Key className="text-emerald-400" size={24} />
+                     </div>
+                     <div className="text-left">
+                        <p className="font-bold text-white">Roles y Permisos</p>
+                        <p className="text-xs text-gray-500">Configuración global</p>
+                     </div>
+                  </Link>
+              </div>
            </div>
         )}
+
         {/* AI Assistant FAB */}
         <AIAvatar />
       </div>
     </div>
   );
 };
-
 export default MenuPage;

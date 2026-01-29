@@ -11,12 +11,20 @@ const MOCK_DB = {
       name: "Roberto Director",
       role: ROLES.SUPERADMIN,
       companyId: null,
+      contractedModules: [
+        "cintas",
+        "arcones",
+        "camiones",
+        "buzones",
+        "acopios",
+      ], // Admin sees all potentially
     },
     {
       id: 2,
       name: "Gerente Planta",
       role: ROLES.MANAGER,
       companyId: "c_andina",
+      contractedModules: ["cintas", "camiones"], // Example: Limited contract
     },
     {
       id: 3,
@@ -24,6 +32,13 @@ const MOCK_DB = {
       role: ROLES.OPERATOR,
       companyId: "c_andina",
       assignedNode: "cintas",
+      contractedModules: [
+        "cintas",
+        "arcones",
+        "camiones",
+        "buzones",
+        "acopios",
+      ], // Operator accesses what the plant has
     },
   ],
   companies: [
@@ -117,7 +132,7 @@ export const api = {
     },
     getModules: async () => {
       return new Promise((resolve) =>
-        setTimeout(() => resolve(MOCK_DB.modules), 400)
+        setTimeout(() => resolve(MOCK_DB.modules), 400),
       );
     },
   },

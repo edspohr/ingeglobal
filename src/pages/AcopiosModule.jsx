@@ -29,8 +29,8 @@ const AcopiosModule = () => {
                     <div className="w-full h-full bg-black relative">
                          {/* Placeholder for Satellite Image */}
                         <img 
-                            src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809?ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80" 
-                            className="w-full h-full object-cover opacity-60 grayscale hover:grayscale-0 transition-all duration-700" 
+                            src="/planta-aerea.jpg" 
+                            className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-all duration-700" 
                             alt="Planta Aérea"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>

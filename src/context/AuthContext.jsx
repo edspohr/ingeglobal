@@ -18,7 +18,8 @@ const MOCK_USERS = {
       canViewAllPlants: true,
       canConfigureUsers: true,
       canViewMoney: true
-    }
+    },
+    contractedModules: ['cintas', 'arcones', 'camiones', 'buzones', 'acopios']
   },
   [ROLES.MANAGER]: {
     id: 2,
@@ -29,7 +30,8 @@ const MOCK_USERS = {
       canViewAllPlants: false,
       canConfigureUsers: false,
       canViewMoney: true
-    }
+    },
+    contractedModules: ['cintas', 'camiones'] // Only these moved to "Contract"
   },
   [ROLES.OPERATOR]: {
     id: 3,
@@ -40,7 +42,8 @@ const MOCK_USERS = {
       canViewAllPlants: false,
       canConfigureUsers: false,
       canViewMoney: false
-    }
+    },
+    contractedModules: ['cintas', 'arcones', 'camiones', 'buzones', 'acopios']
   }
 };
 

@@ -11,6 +11,7 @@ import BuzonesModule from './pages/BuzonesModule';
 import AcopiosModule from './pages/AcopiosModule';
 
 import MenuPage from './pages/MenuPage';
+import AdminPanel from './pages/AdminPanel';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -49,6 +50,7 @@ function App() {
             <Route path="camiones" element={<CamionesModule />} />
             <Route path="buzones" element={<BuzonesModule />} />
             <Route path="acopios" element={<AcopiosModule />} />
+            <Route path="admin" element={<AdminPanel />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
