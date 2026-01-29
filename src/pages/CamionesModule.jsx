@@ -27,8 +27,8 @@ const CamionesModule = () => {
         doc.text("Reporte de Control de Transporte", 14, 20);
         
         doc.setFontSize(10);
-        doc.text(\`Periodo: \${period}\`, 14, 30);
-        doc.text(\`Generado: \${new Date().toLocaleString()}\`, 14, 35);
+        doc.text(`Periodo: ${period}`, 14, 30);
+        doc.text(`Generado: ${new Date().toLocaleString()}`, 14, 35);
 
         // Table
         const headers = [['ID', 'Patente', 'Empresa', 'Material', 'Hora', 'Volumen (m³)', 'Estado']];
@@ -58,9 +58,9 @@ const CamionesModule = () => {
         
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(12);
-        doc.text(\`Total Volumen Transportado: \${totalVol} m³\`, 14, finalY);
+        doc.text(`Total Volumen Transportado: ${totalVol} m³`, 14, finalY);
 
-        doc.save(\`reporte_camiones_\${period.toLowerCase()}.pdf\`);
+        doc.save(`reporte_camiones_${period.toLowerCase()}.pdf`);
     };
 
     if (loading) return <div>Cargando datos de transporte...</div>;
