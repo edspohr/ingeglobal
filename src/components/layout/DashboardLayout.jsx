@@ -127,7 +127,7 @@ const DashboardLayout = () => {
           <Outlet />
         </div>
       </main>
-      </main>
+
       
       {/* AI Assistant FAB */}
       <AIAvatar />
