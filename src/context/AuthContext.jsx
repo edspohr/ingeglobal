@@ -43,7 +43,7 @@ const MOCK_USERS = {
       canConfigureUsers: false,
       canViewMoney: false
     },
-    contractedModules: ['cintas', 'arcones', 'camiones', 'buzones', 'acopios']
+    contractedModules: ['cintas', 'buzones'] // Restricted for testing
   }
 };
 

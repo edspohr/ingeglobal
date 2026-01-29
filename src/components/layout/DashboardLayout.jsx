@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LogOut, Bell, LayoutDashboard, Activity, Database, Truck, Box, Layers } from 'lucide-react'; 
+import { LogOut, Bell, LayoutDashboard, Activity, Database, Truck, Box, Layers, Users } from 'lucide-react'; 
 import AIAvatar from '../common/AIAvatar';
 
 const SidebarItem = ({ icon: Icon, label, path, onClick, active }) => (
@@ -81,6 +81,15 @@ const DashboardLayout = () => {
           )}
 
           <SidebarItem icon={Truck} label={sidebarOpen ? "Gestión Camiones" : ""} path="/camiones" active={location.pathname.includes('camiones')} />
+          
+          {user?.role === 'admin' && (
+             <>
+               <div className="mt-4 mb-2 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  {sidebarOpen ? 'Administración' : '---'}
+               </div>
+               <SidebarItem icon={Users} label={sidebarOpen ? "Gestión Global" : ""} path="/admin" active={location.pathname.includes('admin')} />
+             </>
+          )}
         </nav>
 
         <div className="p-4 border-t border-white/5">
