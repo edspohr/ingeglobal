@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LogOut, Bell, LayoutDashboard, Activity, Database, Truck, Box, Layers } from 'lucide-react'; // Added Layers, removed unused icons
+import { LogOut, Bell, LayoutDashboard, Activity, Database, Truck, Box, Layers } from 'lucide-react'; 
+import AIAvatar from '../common/AIAvatar';
 
 const SidebarItem = ({ icon: Icon, label, path, onClick, active }) => (
   <Link 
@@ -126,6 +127,10 @@ const DashboardLayout = () => {
           <Outlet />
         </div>
       </main>
+      </main>
+      
+      {/* AI Assistant FAB */}
+      <AIAvatar />
     </div>
   );
 };

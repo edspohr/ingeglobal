@@ -1,27 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../services/mockApi';
 import { useAuth } from '../context/AuthContext';
 import MetricCard from '../components/common/MetricCard';
 import { Activity, Database, Truck, Layers } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { mockSensorData } from '../data/mockData';
 
 const DashboardHome = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  const { user, ROLES } = useAuth();
 
   useEffect(() => {
-    const load = async () => {
-      const allModules = await api.data.getModules();
-      setData(allModules);
+    // Simulate data loading
+    setTimeout(() => {
+      setData(mockSensorData);
       setLoading(false);
-    };
-    load();
+    }, 500);
   }, []);
 
   if (loading) return <div>Cargando dashboard...</div>;
 
-  const isOperator = user?.role === 'operator';
+  const isOperator = user?.role === ROLES.OPERATOR;
+  
+  // Calculations
+  const flowRateM3H = (data.cintas.currentFlow * 3600).toFixed(2); // Convert m3/s to m3/h
+  const totalVolumeAcc = data.arcones.reduce((acc, curr) => acc + curr.volume_acc_m3, 0).toLocaleString('es-CL');
+  const currentStock = data.arcones.reduce((acc, curr) => acc + curr.current, 0);
 
   return (
     <div className="space-y-8">
@@ -34,22 +38,24 @@ const DashboardHome = () => {
        </div>
 
        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+           {/* KPI 1: Tasa de Flujo (Convertida) */}
            <Link to="/cintas" className="block transform transition hover:scale-105">
                 <MetricCard 
-                    title="Flujo Cintas" 
-                    value={`${data.cintas.currentFlow} m³/min`} 
-                    trend={data.cintas.currentFlow > 1.2 ? "up" : "down"}
+                    title="Flujo Volumétrico" 
+                    value={`${flowRateM3H} m³/h`} 
+                    trend="up"
                     trendValue="Live"
                     icon={Activity}
-                    color="brand-gold" // Uses tailwind color logic
+                    color="brand-gold"
                 />
            </Link>
            
+           {/* KPI 2: Stock Actual (Visible para todos, pero detalle restringido en módulo) */}
            {!isOperator && (
              <Link to="/arcones" className="block transform transition hover:scale-105">
                   <MetricCard 
-                      title="Stock Arcones" 
-                      value={`${data.arcones.reduce((acc, curr) => acc + curr.current, 0)} m³`} 
+                      title="Stock Actual" 
+                      value={`${currentStock} m³`} 
                       trend="down"
                       trendValue="-120 m³"
                       icon={Database}
@@ -58,29 +64,29 @@ const DashboardHome = () => {
              </Link>
            )}
 
-            <Link to="/camiones" className="block transform transition hover:scale-105">
+            {/* KPI 3: Volumen Acumulado (Total Historico) */}
+            <div className="block transform transition hover:scale-105">
                 <MetricCard 
-                    title="Camiones Hoy" 
-                    value={data.camiones.length} 
+                    title="Volumen Acumulado" 
+                    value={`${totalVolumeAcc} m³`} 
                     trend="up"
-                    trendValue="+3"
-                    icon={Truck}
+                    trendValue="Total Histórico"
+                    icon={Database}
                     color="purple"
                 />
-           </Link>
+            </div>
 
-            {!isOperator && (
-              <Link to="/buzones" className="block transform transition hover:scale-105">
-                  <MetricCard 
-                      title="Estado Buzón" 
-                      value={data.buzones.status === 'flowing' ? 'Normal' : 'Alerta'} 
-                      trend={data.buzones.status === 'flowing' ? 'up' : 'down'}
-                      trendValue={data.buzones.fillLevel + '%'}
-                      icon={Layers}
-                      color={data.buzones.status === 'flowing' ? 'emerald' : 'red'}
-                  />
-             </Link>
-            )}
+            {/* KPI 4: Camiones */}
+            <Link to="/camiones" className="block transform transition hover:scale-105">
+                <MetricCard 
+                    title="Camiones Turno" 
+                    value={data.camiones.filter(t => t.time > '08:00').length} 
+                    trend="up"
+                    trendValue="En proceso"
+                    icon={Truck}
+                    color="emerald"
+                />
+           </Link>
        </div>
 
        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -10,6 +10,8 @@ import CamionesModule from './pages/CamionesModule';
 import BuzonesModule from './pages/BuzonesModule';
 import AcopiosModule from './pages/AcopiosModule';
 
+import MenuPage from './pages/MenuPage';
+
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
@@ -30,6 +32,12 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           
+          <Route path="/menu" element={
+            <ProtectedRoute>
+              <MenuPage />
+            </ProtectedRoute>
+          } />
+
           <Route path="/" element={
             <ProtectedRoute>
               <DashboardLayout />

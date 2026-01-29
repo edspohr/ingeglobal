@@ -14,7 +14,7 @@ const Login = () => {
     try {
       const result = await login(role);
       if (result) {
-        navigate('/', { replace: true });
+        navigate('/menu', { replace: true });
       }
     } catch (e) {
       console.error("Login Error in component:", e);

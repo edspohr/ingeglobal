@@ -1,83 +1,143 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../services/mockApi';
-import { Truck, Camera, CheckCircle, Clock, ArrowRight } from 'lucide-react';
+import { mockSensorData } from '../data/mockData';
+import { FileText, Download, Filter, Printer } from 'lucide-react';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const CamionesModule = () => {
-    const [data, setData] = useState(null);
+    const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
-  
+
     useEffect(() => {
-      const load = async () => {
-        const allModules = await api.data.getModules();
-        setData(allModules.camiones);
-        setLoading(false);
-      };
-      load();
+        // Simulate fetch
+        setTimeout(() => {
+            setData(mockSensorData.camiones);
+            setLoading(false);
+        }, 500);
     }, []);
-  
-    if (loading) return <div>Cargando...</div>;
+
+    const generatePDF = (period) => {
+        const doc = new jsPDF();
+        
+        // Header
+        doc.setFillColor(15, 23, 42); // brand-dark
+        doc.rect(0, 0, 210, 40, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(22);
+        doc.text("Reporte de Control de Transporte", 14, 20);
+        
+        doc.setFontSize(10);
+        doc.text(\`Periodo: \${period}\`, 14, 30);
+        doc.text(\`Generado: \${new Date().toLocaleString()}\`, 14, 35);
+
+        // Table
+        const headers = [['ID', 'Patente', 'Empresa', 'Material', 'Hora', 'Volumen (m³)', 'Estado']];
+        const rows = data.map(row => [
+            row.id,
+            row.plate,
+            row.company,
+            row.material,
+            row.time,
+            row.volume,
+            row.status
+        ]);
+
+        doc.autoTable({
+            head: headers,
+            body: rows,
+            startY: 45,
+            theme: 'grid',
+            headStyles: { fillColor: [212, 162, 78], textColor: 0 }, // brand-gold
+            alternateRowStyles: { fillColor: [245, 245, 245] },
+            styles: { fontSize: 8 }
+        });
+
+        // Summary
+        const totalVol = data.reduce((acc, curr) => acc + curr.volume, 0);
+        const finalY = doc.lastAutoTable.finalY + 10;
+        
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(12);
+        doc.text(\`Total Volumen Transportado: \${totalVol} m³\`, 14, finalY);
+
+        doc.save(\`reporte_camiones_\${period.toLowerCase()}.pdf\`);
+    };
+
+    if (loading) return <div>Cargando datos de transporte...</div>;
 
     return (
         <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-white tracking-tight">Control de Transporte</h1>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold text-white tracking-tight">Reportes de Transporte</h1>
+                    <p className="text-gray-400">Registro detallado de ingreso y salida de material.</p>
+                </div>
+                
+                <div className="flex gap-2">
+                    <button 
+                        onClick={() => generatePDF('Diario')}
+                        className="flex items-center space-x-2 px-4 py-2 bg-brand-gold text-black font-bold rounded-lg hover:bg-yellow-500 transition-colors"
+                    >
+                        <FileText size={18} />
+                        <span>PDF Diario</span>
+                    </button>
+                    <button 
+                        onClick={() => generatePDF('Semanal')}
+                        className="flex items-center space-x-2 px-4 py-2 bg-white/5 text-white font-medium rounded-lg hover:bg-white/10 border border-white/10 transition-colors"
+                    >
+                        <Printer size={18} />
+                        <span>Semanal</span>
+                    </button>
+                </div>
+            </div>
             
-            <div className="glass-panel rounded-xl overflow-hidden"> 
+            <div className="glass-panel rounded-xl overflow-hidden border border-white/5"> 
+                <div className="p-4 border-b border-white/5 flex gap-4">
+                    <div className="relative">
+                        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                        <input 
+                            type="text" 
+                            placeholder="Filtrar por patente..." 
+                            className="bg-black/20 border border-white/10 rounded-lg pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-brand-gold w-64"
+                        />
+                    </div>
+                </div>
+
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-brand-surface border-b border-white/5 text-xs text-gray-400 uppercase tracking-wider">
-                                <th className="p-4 rounded-tl-xl">ID / Patente</th>
-                                <th className="p-4">Empresa / Material</th>
-                                <th className="p-4 text-center">Hora</th>
-                                <th className="p-4 text-center">Volumen</th>
-                                <th className="p-4 text-center">Estado</th>
-                                <th className="p-4 text-center rounded-tr-xl">Evidencia</th>
+                            <tr className="bg-white/5 text-xs text-gray-400 uppercase tracking-wider">
+                                <th className="p-4 font-semibold">ID Transacción</th>
+                                <th className="p-4 font-semibold">Patente</th>
+                                <th className="p-4 font-semibold">Empresa</th>
+                                <th className="p-4 font-semibold">Material</th>
+                                <th className="p-4 text-center font-semibold">Hora Entrada</th>
+                                <th className="p-4 text-center font-semibold">Volumen (m³)</th>
+                                <th className="p-4 text-center font-semibold">Estado</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
-                            {data.map(truck => (
-                                <tr key={truck.id} className="group hover:bg-white/5 transition-colors">
+                        <tbody className="divide-y divide-white/5 text-sm">
+                            {data.map((truck, idx) => (
+                                <tr key={truck.id} className="hover:bg-white/5 transition-colors group">
+                                    <td className="p-4 font-mono text-gray-500">{truck.id}</td>
+                                    <td className="p-4 font-bold text-white">{truck.plate}</td>
+                                    <td className="p-4 text-gray-300">{truck.company}</td>
                                     <td className="p-4">
-                                        <div className="flex items-center">
-                                            <div className="h-10 w-10 rounded-full bg-brand-surface flex items-center justify-center mr-3 border border-white/10">
-                                                <Truck className="w-5 h-5 text-gray-400 group-hover:text-brand-gold transition-colors" />
-                                            </div>
-                                            <div>
-                                                <p className="font-bold text-white">{truck.plate}</p>
-                                                <p className="text-xs text-gray-500">{truck.id}</p>
-                                            </div>
-                                        </div>
+                                        <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${truck.material === 'Cobre' ? 'bg-orange-500/10 text-orange-400' : 'bg-gray-500/10 text-gray-400'}`}>
+                                            {truck.material}
+                                        </span>
                                     </td>
-                                    <td className="p-4">
-                                        <p className="text-white font-medium">{truck.company}</p>
-                                        <span className="inline-block mt-1 px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 text-xs font-semibold">{truck.material}</span>
-                                    </td>
-                                    <td className="p-4 text-center text-gray-300 font-mono">{truck.time}</td>
+                                    <td className="p-4 text-center text-gray-300">{truck.time}</td>
+                                    <td className="p-4 text-center font-bold text-brand-gold">{truck.volume}</td>
                                     <td className="p-4 text-center">
-                                        <span className="text-lg font-bold text-white">{truck.volume}</span>
-                                        <span className="text-xs text-brand-gold ml-1">m³</span>
-                                    </td>
-                                    <td className="p-4 text-center">
-                                        {truck.status === 'completed' && (
-                                            <span className="flex items-center justify-center text-xs text-emerald-400 font-bold bg-emerald-500/10 py-1 px-2 rounded-full">
-                                                <CheckCircle className="w-3 h-3 mr-1" /> Completado
-                                            </span>
-                                        )}
-                                        {truck.status === 'processing' && (
-                                            <span className="flex items-center justify-center text-xs text-brand-gold font-bold bg-brand-gold/10 py-1 px-2 rounded-full">
-                                                <Clock className="w-3 h-3 mr-1" /> En Proceso
-                                            </span>
-                                        )}
-                                          {truck.status === 'entering' && (
-                                            <span className="flex items-center justify-center text-xs text-blue-400 font-bold bg-blue-500/10 py-1 px-2 rounded-full">
-                                                <ArrowRight className="w-3 h-3 mr-1" /> Ingresando
-                                            </span>
-                                        )}
-                                    </td>
-                                    <td className="p-4 text-center">
-                                        <button className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-white" title="Ver Evidencia">
-                                            <Camera className="w-5 h-5" />
-                                        </button>
+                                         <span className={`
+                                            inline-flex items-center px-2 py-1 rounded-full text-xs font-bold
+                                            ${truck.status === 'completed' ? 'bg-emerald-500/10 text-emerald-400' : 
+                                              truck.status === 'processing' ? 'bg-blue-500/10 text-blue-400' : 
+                                              'bg-yellow-500/10 text-yellow-400'}
+                                         `}>
+                                            {truck.status === 'completed' ? 'Completado' : truck.status === 'processing' ? 'En Proceso' : 'Ingresando'}
+                                         </span>
                                     </td>
                                 </tr>
                             ))}

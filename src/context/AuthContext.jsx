@@ -1,7 +1,48 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { api, ROLES } from '../services/mockApi';
+import { api } from '../services/mockApi';
 
 const AuthContext = createContext(null);
+
+export const ROLES = {
+  SUPERADMIN: 'superadmin',
+  MANAGER: 'manager',
+  OPERATOR: 'operator'
+};
+
+const MOCK_USERS = {
+  [ROLES.SUPERADMIN]: {
+    id: 1,
+    name: 'Fernando',
+    role: ROLES.SUPERADMIN,
+    permissions: {
+      canViewAllPlants: true,
+      canConfigureUsers: true,
+      canViewMoney: true
+    }
+  },
+  [ROLES.MANAGER]: {
+    id: 2,
+    name: 'Gerente Planta',
+    role: ROLES.MANAGER,
+    plantId: 'planta-1',
+    permissions: {
+      canViewAllPlants: false,
+      canConfigureUsers: false,
+      canViewMoney: true
+    }
+  },
+  [ROLES.OPERATOR]: {
+    id: 3,
+    name: 'Operario Turno',
+    role: ROLES.OPERATOR,
+    plantId: 'planta-1',
+    permissions: {
+      canViewAllPlants: false,
+      canConfigureUsers: false,
+      canViewMoney: false
+    }
+  }
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -19,7 +60,12 @@ export const AuthProvider = ({ children }) => {
   const login = async (role) => {
     setLoading(true);
     try {
-      const userData = await api.auth.login(role);
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const userData = MOCK_USERS[role];
+      if (!userData) throw new Error("Invalid role");
+
       setUser(userData);
       localStorage.setItem('ingeglobal_user', JSON.stringify(userData));
       return true;
