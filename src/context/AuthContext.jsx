@@ -155,7 +155,7 @@ export const AuthProvider = ({ children }) => {
       ROLES,
       STATUS
     }}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };
