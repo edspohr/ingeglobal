@@ -1,50 +1,29 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { api } from '../services/mockApi';
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged,
+  sendPasswordResetEmail,
+  GoogleAuthProvider,
+  signInWithPopup
+} from 'firebase/auth';
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db } from '../services/firebase';
 
 const AuthContext = createContext(null);
 
 export const ROLES = {
-  SUPERADMIN: 'superadmin',
+  ADMIN: 'admin',
   MANAGER: 'manager',
-  OPERATOR: 'operator'
+  OPERATOR: 'operator',
+  GUEST: 'guest'
 };
 
-const MOCK_USERS = {
-  [ROLES.SUPERADMIN]: {
-    id: 1,
-    name: 'Fernando',
-    role: ROLES.SUPERADMIN,
-    permissions: {
-      canViewAllPlants: true,
-      canConfigureUsers: true,
-      canViewMoney: true
-    },
-    contractedModules: ['cintas', 'arcones', 'camiones', 'buzones', 'acopios']
-  },
-  [ROLES.MANAGER]: {
-    id: 2,
-    name: 'Gerente Planta',
-    role: ROLES.MANAGER,
-    plantId: 'planta-1',
-    permissions: {
-      canViewAllPlants: false,
-      canConfigureUsers: false,
-      canViewMoney: true
-    },
-    contractedModules: ['cintas', 'camiones'] // Only these moved to "Contract"
-  },
-  [ROLES.OPERATOR]: {
-    id: 3,
-    name: 'Operario Turno',
-    role: ROLES.OPERATOR,
-    plantId: 'planta-1',
-    permissions: {
-      canViewAllPlants: false,
-      canConfigureUsers: false,
-      canViewMoney: false
-    },
-    contractedModules: ['cintas', 'buzones'] // Restricted for testing
-  }
+export const STATUS = {
+  PENDING: 'pending',
+  ACTIVE: 'active',
+  SUSPENDED: 'suspended'
 };
 
 export const AuthProvider = ({ children }) => {
@@ -52,42 +31,131 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check local storage or init
-    const stored = localStorage.getItem('ingeglobal_user');
-    if (stored) {
-      setUser(JSON.parse(stored));
-    }
-    setLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // User is signed in, fetch Firestore data
+        try {
+          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+          if (userDoc.exists()) {
+            setUser({
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              ...userDoc.data()
+            });
+          } else {
+            // Document doesn't exist yet (should happen during sign up flow)
+            setUser({
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              role: ROLES.GUEST,
+              status: STATUS.PENDING
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          setUser(null);
+        }
+      } else {
+        // User is signed out
+        setUser(null);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const login = async (role) => {
-    setLoading(true);
+  const login = async (email, password) => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const userData = MOCK_USERS[role];
-      if (!userData) throw new Error("Invalid role");
-
-      setUser(userData);
-      localStorage.setItem('ingeglobal_user', JSON.stringify(userData));
-      return true;
+      await signInWithEmailAndPassword(auth, email, password);
+      return { success: true };
     } catch (error) {
-      console.error("Login failed", error);
-      return false;
-    } finally {
-      setLoading(false);
+      console.error("Login Error:", error);
+      return { success: false, error: error.message };
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('ingeglobal_user');
+  const register = async (email, password) => {
+    try {
+      const { user: firebaseUser } = await createUserWithEmailAndPassword(auth, email, password);
+      
+      // Initial Firestore document creation
+      const userData = {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email,
+        role: ROLES.GUEST,
+        status: STATUS.PENDING,
+        createdAt: serverTimestamp(),
+        contractedModules: []
+      };
+
+      await setDoc(doc(db, 'users', firebaseUser.uid), userData);
+      
+      return { success: true };
+    } catch (error) {
+      console.error("Registration Error:", error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Logout Error:", error);
+    }
+  };
+
+  const resetPassword = async (email) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      return { success: true };
+    } catch (error) {
+      console.error("Reset Password Error:", error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const updateUserProfile = async (data) => {
+    if (!user) return { success: false, error: "No user logged in" };
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, data);
+      
+      // Update local state partially
+      setUser(prev => ({ ...prev, ...data }));
+      return { success: true };
+    } catch (error) {
+      console.error("Update Profile Error:", error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const loginWithGoogle = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+      return { success: true };
+    } catch (error) {
+      console.error("Google Login Error:", error);
+      return { success: false, error: error.message };
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, ROLES }}>
-      {children}
+    <AuthContext.Provider value={{ 
+      user, 
+      loading, 
+      login, 
+      register, 
+      logout, 
+      resetPassword, 
+      updateUserProfile, 
+      loginWithGoogle,
+      ROLES,
+      STATUS
+    }}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

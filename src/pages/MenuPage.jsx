@@ -8,7 +8,7 @@ const MenuPage = () => {
   const { user, logout } = useAuth();
   const contracted = user?.contractedModules || [];
 
-  const isDisabled = (moduleId) => !contracted.includes(moduleId) && user?.role !== ROLES.SUPERADMIN;
+  const isDisabled = (moduleId) => !contracted.includes(moduleId) && user?.role !== ROLES.ADMIN;
 
   const MENU_ITEMS = [
     { 
@@ -85,10 +85,10 @@ const MenuPage = () => {
               </h1>
               <div className="flex items-center space-x-3">
                  <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border
-                    ${user?.role === ROLES.SUPERADMIN ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' : 
+                    ${user?.role === ROLES.ADMIN ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' : 
                       user?.role === ROLES.MANAGER ? 'bg-brand-gold/10 border-brand-gold/20 text-brand-gold' : 
                       'bg-blue-500/10 border-blue-500/20 text-blue-400'}`}>
-                    {user?.role === ROLES.SUPERADMIN ? 'Super Admin' : user?.role === ROLES.MANAGER ? 'Gerente de Planta' : 'Operador'}
+                    {user?.role === ROLES.ADMIN ? 'Admin' : user?.role === ROLES.MANAGER ? 'Gerente de Planta' : 'Operador'}
                  </span>
                  <span className="text-gray-500 text-sm">
                     {new Date().toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' })}
@@ -171,7 +171,7 @@ const MenuPage = () => {
         </div>
 
         {/* Admin Management Section */}
-        {user?.role === ROLES.SUPERADMIN && (
+        {user?.role === ROLES.ADMIN && (
            <div className="mt-8 border-t border-white/10 pt-8 animate-fade-in-up">
               <h3 className="text-white font-bold mb-6 flex items-center text-lg">
                  <Settings className="w-5 h-5 mr-2 text-gray-400" />
