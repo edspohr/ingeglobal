@@ -48,12 +48,14 @@ const CompleteProfile = () => {
               Cerrar Sesión
             </button>
           </div>
-          <div className="w-20 h-20 bg-brand-gold/10 border border-brand-gold/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <User className="w-10 h-10 text-brand-gold" />
+          
+          <div className="text-center mb-8">
+            <div className="w-20 h-20 bg-brand-gold/10 border border-brand-gold/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <User className="w-10 h-10 text-brand-gold" />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-2">Complete su Perfil</h2>
+            <p className="text-gray-400 text-sm">Necesitamos algunos datos adicionales antes de procesar su solicitud de acceso.</p>
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">Complete su Perfil</h2>
-          <p className="text-gray-400 text-sm">Necesitamos algunos datos adicionales antes de procesar su solicitud de acceso.</p>
-        </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
