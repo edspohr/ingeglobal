@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { User, Phone, Briefcase, Save, RefreshCw } from 'lucide-react';
 
 const CompleteProfile = () => {
-  const { updateUserProfile, STATUS } = useAuth();
+  const { updateUserProfile, logout, STATUS } = useAuth();
   const [formData, setFormData] = useState({
     displayName: '',
     phoneNumber: '',
@@ -40,7 +40,14 @@ const CompleteProfile = () => {
         animate={{ opacity: 1, scale: 1 }}
         className="glass-panel max-w-lg w-full p-8 border border-white/10"
       >
-        <div className="text-center mb-8">
+          <div className="absolute top-4 right-4">
+            <button 
+              onClick={() => logout()} 
+              className="text-xs text-gray-500 hover:text-white transition-colors uppercase tracking-widest"
+            >
+              Cerrar Sesión
+            </button>
+          </div>
           <div className="w-20 h-20 bg-brand-gold/10 border border-brand-gold/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <User className="w-10 h-10 text-brand-gold" />
           </div>

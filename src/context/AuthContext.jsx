@@ -1,29 +1,35 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import { 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  signOut, 
+import React, { createContext, useState, useContext, useEffect } from "react";
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
   onAuthStateChanged,
   sendPasswordResetEmail,
   GoogleAuthProvider,
-  signInWithPopup
-} from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db } from '../services/firebase';
+  signInWithPopup,
+} from "firebase/auth";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  serverTimestamp,
+} from "firebase/firestore";
+import { auth, db } from "../services/firebase";
 
 const AuthContext = createContext(null);
 
 export const ROLES = {
-  ADMIN: 'admin',
-  MANAGER: 'manager',
-  OPERATOR: 'operator',
-  GUEST: 'guest'
+  ADMIN: "admin",
+  MANAGER: "manager",
+  OPERATOR: "operator",
+  GUEST: "guest",
 };
 
 export const STATUS = {
-  PENDING: 'pending',
-  ACTIVE: 'active',
-  SUSPENDED: 'suspended'
+  PENDING: "pending",
+  ACTIVE: "active",
+  SUSPENDED: "suspended",
 };
 
 export const AuthProvider = ({ children }) => {
@@ -35,12 +41,12 @@ export const AuthProvider = ({ children }) => {
       if (firebaseUser) {
         // User is signed in, fetch Firestore data
         try {
-          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+          const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
           if (userDoc.exists()) {
             setUser({
               uid: firebaseUser.uid,
               email: firebaseUser.email,
-              ...userDoc.data()
+              ...userDoc.data(),
             });
           } else {
             // Document doesn't exist yet (should happen during sign up flow)
@@ -48,7 +54,7 @@ export const AuthProvider = ({ children }) => {
               uid: firebaseUser.uid,
               email: firebaseUser.email,
               role: ROLES.GUEST,
-              status: STATUS.PENDING
+              status: STATUS.PENDING,
             });
           }
         } catch (error) {
@@ -77,8 +83,12 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (email, password) => {
     try {
-      const { user: firebaseUser } = await createUserWithEmailAndPassword(auth, email, password);
-      
+      const { user: firebaseUser } = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
+
       // Initial Firestore document creation
       const userData = {
         uid: firebaseUser.uid,
@@ -86,11 +96,11 @@ export const AuthProvider = ({ children }) => {
         role: ROLES.GUEST,
         status: STATUS.PENDING,
         createdAt: serverTimestamp(),
-        contractedModules: []
+        contractedModules: [],
       };
 
-      await setDoc(doc(db, 'users', firebaseUser.uid), userData);
-      
+      await setDoc(doc(db, "users", firebaseUser.uid), userData);
+
       return { success: true };
     } catch (error) {
       console.error("Registration Error:", error);
@@ -119,11 +129,12 @@ export const AuthProvider = ({ children }) => {
   const updateUserProfile = async (data) => {
     if (!user) return { success: false, error: "No user logged in" };
     try {
-      const userRef = doc(db, 'users', user.uid);
-      await updateDoc(userRef, data);
-      
+      const userRef = doc(db, "users", user.uid);
+      // Use setDoc with merge: true to create the document if it doesn't exist
+      await setDoc(userRef, data, { merge: true });
+
       // Update local state partially
-      setUser(prev => ({ ...prev, ...data }));
+      setUser((prev) => ({ ...prev, ...data }));
       return { success: true };
     } catch (error) {
       console.error("Update Profile Error:", error);
@@ -143,18 +154,20 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      loading, 
-      login, 
-      register, 
-      logout, 
-      resetPassword, 
-      updateUserProfile, 
-      loginWithGoogle,
-      ROLES,
-      STATUS
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        register,
+        logout,
+        resetPassword,
+        updateUserProfile,
+        loginWithGoogle,
+        ROLES,
+        STATUS,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
