@@ -72,22 +72,6 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    // -------------------------------------------------------------
-    // MOCK SUPERADMIN OVERRIDE
-    // -------------------------------------------------------------
-    if (email === "fernandoibanezr1976@gmail.com" && password === "123456") {
-      setUser({
-        uid: "mock-superadmin-fernando",
-        email: "fernandoibanezr1976@gmail.com",
-        displayName: "Fernando Ibañez",
-        jobTitle: "Superadmin",
-        role: ROLES.ADMIN,
-        status: STATUS.ACTIVE,
-      });
-      return { success: true };
-    }
-    // -------------------------------------------------------------
-
     try {
       await signInWithEmailAndPassword(auth, email, password);
       return { success: true };
