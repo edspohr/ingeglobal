@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, User, ArrowRight, ShieldCheck, RefreshCw, AlertCircle } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, ShieldCheck, RefreshCw, AlertCircle, ArrowLeft } from 'lucide-react';
 
 const Login = () => {
   const { login, register, resetPassword, loginWithGoogle } = useAuth();
@@ -25,7 +25,7 @@ const Login = () => {
       let result;
       if (mode === 'login') {
         result = await login(email, password);
-        if (result.success) navigate('/');
+        if (result.success) navigate('/dashboard');
       } else if (mode === 'register') {
         if (password !== confirmPassword) {
           throw new Error("Las contraseñas no coinciden");
@@ -52,7 +52,7 @@ const Login = () => {
     setLoading(true);
     try {
       const result = await loginWithGoogle();
-      if (result.success) navigate('/');
+      if (result.success) navigate('/dashboard');
       else setError(result.error);
     } catch (e) {
       setError(e.message);
@@ -87,6 +87,20 @@ const Login = () => {
           animate={{ opacity: 1, y: 0 }}
           className="glass-panel p-8 md:p-10 border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)]"
         >
+          {/* Back link */}
+          <div className="flex justify-between items-center mb-6">
+            <Link
+              to="/"
+              className="flex items-center gap-1.5 text-gray-500 hover:text-brand-gold text-xs transition-colors group"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+              Volver al inicio
+            </Link>
+            <span className="text-[10px] text-gray-600 uppercase tracking-widest">
+              Portal Industrial
+            </span>
+          </div>
+
           {/* Logo */}
           <div className="flex justify-center mb-8">
             <motion.div 
@@ -253,9 +267,20 @@ const Login = () => {
           </div>
         </motion.div>
         
-        <p className="mt-8 text-center text-xs text-gray-600 font-medium tracking-widest uppercase">
-          Ingeglobal Industrial Dashboard • v2.0
-        </p>
+        <div className="mt-6 text-center space-y-2">
+          <p className="text-xs text-gray-600">
+            ¿No tienes acceso?{' '}
+            <Link
+              to="/#contacto"
+              className="text-brand-gold hover:underline font-semibold"
+            >
+              Solicita una demo
+            </Link>
+          </p>
+          <p className="text-[10px] text-gray-700 uppercase tracking-widest">
+            Ingeglobal Industrial Dashboard • v2.0
+          </p>
+        </div>
       </div>
     </div>
   );
