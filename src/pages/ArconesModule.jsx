@@ -5,7 +5,19 @@ import { motion } from 'framer-motion';
 
 const BunkerVisual = ({ data, index }) => {
   const percentage = (data.current / data.max) * 100;
-  const isLow = percentage < 30;
+  
+  // Color Logic: >70 Green, 50-70 Yellow, <50 Red
+  let fillColor = 'bg-green-500/60';
+  let isWarning = false;
+  let isCritical = false;
+
+  if (percentage < 50) {
+    fillColor = 'bg-red-500/60';
+    isCritical = true;
+  } else if (percentage <= 70) {
+    fillColor = 'bg-yellow-500/60';
+    isWarning = true;
+  }
 
   return (
     <motion.div 
@@ -32,7 +44,7 @@ const BunkerVisual = ({ data, index }) => {
             initial={{ height: 0 }}
             animate={{ height: `${percentage}%` }}
             transition={{ duration: 1.5, ease: "easeOut" }}
-            className={`absolute bottom-0 left-0 w-full ${isLow ? 'bg-red-500/60' : 'bg-brand-gold/60'} backdrop-blur-sm transition-colors duration-500`}
+            className={`absolute bottom-0 left-0 w-full ${fillColor} backdrop-blur-sm transition-colors duration-500`}
          >
             {/* Wave Effect Mock */}
             <div className="absolute top-0 w-full h-2 bg-white/20"></div>
@@ -45,10 +57,16 @@ const BunkerVisual = ({ data, index }) => {
       </div>
 
       <div className="z-10 flex justify-between items-center mt-2">
-         {isLow && (
+         {isCritical ? (
              <span className="flex items-center text-xs font-bold text-red-400 animate-pulse">
-                <AlertTriangle className="w-3 h-3 mr-1" /> STOCK CRÍTICO
+                <AlertTriangle className="w-4 h-4 mr-1" /> NIVEL CRÍTICO
              </span>
+         ) : isWarning ? (
+            <span className="flex items-center text-xs font-bold text-yellow-400">
+               <AlertTriangle className="w-4 h-4 mr-1" /> REVISAR NIVEL
+            </span>
+         ) : (
+             <div className="w-1 h-1"></div> // placeholder
          )}
          <span className="ml-auto text-xs text-gray-400">Consumo diario: <span className="text-white">{data.consumed} m³</span></span>
       </div>
