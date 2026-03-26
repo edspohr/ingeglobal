@@ -13,6 +13,7 @@ import BuzonesModule from './pages/BuzonesModule';
 import AcopiosModule from './pages/AcopiosModule';
 import MenuPage from './pages/MenuPage';
 import AdminPanel from './pages/AdminPanel';
+import LandingPage from './pages/LandingPage';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading, STATUS } = useAuth();
@@ -63,7 +64,8 @@ function App() {
     <Router>
       <AuthProvider>
         <Routes>
-          {/* Public Route */}
+          {/* Public Routes */}
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           
           {/* Onboarding Routes */}
@@ -86,7 +88,7 @@ function App() {
             </ProtectedRoute>
           } />
 
-          <Route path="/" element={
+          <Route path="/dashboard" element={
             <ProtectedRoute>
               <DashboardLayout />
             </ProtectedRoute>
@@ -100,7 +102,7 @@ function App() {
             <Route path="admin" element={<AdminPanel />} />
           </Route>
 
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </AuthProvider>
     </Router>
