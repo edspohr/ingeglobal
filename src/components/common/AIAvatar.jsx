@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Bot, X, Send, Sparkles, Loader2 } from "lucide-react";
+import { X, Send, Sparkles, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import * as mockData from "../../data/mockData";
+import MiningRobotAvatar from "./MiningRobotAvatar";
 
 // Initialize Gemini
 // We only initialize the client if the API key is present
@@ -13,7 +14,8 @@ if (apiKey) {
   model = genAI.getGenerativeModel({
     model: "gemini-2.5-flash-lite",
     systemInstruction: `Eres un asistente virtual de IA integrado en la plataforma web de gestión minera/industrial "Ingeglobal".
-Tu objetivo es responder a las preguntas del usuario siendo breve, profesional y basándote EXCLUSIVAMENTE en los siguientes datos proporcionados en formato JSON: 
+Tu personaje es un robot minero amigable. Mantén un tono profesional pero cercano, con un toque lúdico ocasional.
+Tu objetivo es responder a las preguntas del usuario siendo breve, profesional y basándote EXCLUSIVAMENTE en los siguientes datos proporcionados en formato JSON:
 
 ${JSON.stringify(mockData)}
 
@@ -49,7 +51,7 @@ const AIAvatar = () => {
   const [messages, setMessages] = useState([
     {
       role: "model",
-      text: "Hola, soy tu asistente de operaciones. ¿Qué necesitas analizar hoy?",
+      text: "Hola, soy tu asistente minero. ¿Qué necesitas analizar hoy?",
     },
   ]);
   const [input, setInput] = useState("");
@@ -128,17 +130,14 @@ const AIAvatar = () => {
     <>
       {/* Floating Button */}
       <motion.button
-        className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-brand-gold to-yellow-600 shadow-[0_0_20px_rgba(212,162,78,0.5)] border-2 border-white/20 text-black hover:scale-105 transition-transform"
+        className="fixed bottom-6 right-6 z-50 flex items-center justify-center rounded-full hover:scale-105 transition-transform"
         onClick={() => setIsOpen(true)}
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        whileHover={{ rotate: 10 }}
+        whileHover={{ rotate: 6 }}
+        aria-label="Abrir asistente minero"
       >
-        <Bot size={32} />
-        <span className="absolute -top-1 -right-1 flex h-4 w-4">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 border-2 border-brand-gold"></span>
-        </span>
+        <MiningRobotAvatar size={64} showNotificationDot />
       </motion.button>
 
       {/* Chat Interface Modal/Popover */}
@@ -153,11 +152,9 @@ const AIAvatar = () => {
             {/* Header */}
             <div className="p-4 bg-gradient-to-r from-brand-gold/10 to-transparent border-b border-white/10 flex justify-between items-center">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-full bg-brand-gold/20 flex items-center justify-center border border-brand-gold/30">
-                  <Bot className="text-brand-gold w-6 h-6" />
-                </div>
+                <MiningRobotAvatar size={40} />
                 <div>
-                  <h3 className="font-bold text-white">Asistente IA</h3>
+                  <h3 className="font-bold text-white">Asistente Minero IA</h3>
                   <p className="text-xs text-brand-gold flex items-center">
                     <Sparkles className="w-3 h-3 mr-1" />{" "}
                     {model ? "En línea" : "Sin conexión"}

@@ -153,6 +153,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Demo-only: inject a mock user directly into context state. Bypasses Firebase
+  // and never touches Firestore. Intended to be called from DemoProfileSwitcher
+  // when VITE_DEMO_MODE === 'true'.
+  const setDemoUser = (userObject) => {
+    setUser(userObject);
+    setLoading(false);
+  };
+
+  const clearDemoUser = () => {
+    setUser(null);
+    setLoading(false);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -164,6 +177,8 @@ export const AuthProvider = ({ children }) => {
         resetPassword,
         updateUserProfile,
         loginWithGoogle,
+        setDemoUser,
+        clearDemoUser,
         ROLES,
         STATUS,
       }}

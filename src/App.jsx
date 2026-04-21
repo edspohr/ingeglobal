@@ -14,6 +14,7 @@ import AcopiosModule from './pages/AcopiosModule';
 import MenuPage from './pages/MenuPage';
 import AdminPanel from './pages/AdminPanel';
 import LandingPage from './pages/LandingPage';
+import DemoProfileSwitcher from './components/demo/DemoProfileSwitcher';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading, STATUS } = useAuth();
@@ -63,6 +64,7 @@ function App() {
   return (
     <Router>
       <AuthProvider>
+        <DemoProfileSwitcher />
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
