@@ -5,6 +5,8 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import * as mockData from "../../data/mockData";
 import MiningRobotAvatar from "./MiningRobotAvatar";
 
+const GREETING_BUBBLE_DURATION_MS = 12000;
+
 // Initialize Gemini
 // We only initialize the client if the API key is present
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
@@ -13,8 +15,8 @@ if (apiKey) {
   const genAI = new GoogleGenerativeAI(apiKey);
   model = genAI.getGenerativeModel({
     model: "gemini-2.5-flash-lite",
-    systemInstruction: `Eres un asistente virtual de IA integrado en la plataforma web de gestión minera/industrial "Ingeglobal".
-Tu nombre es AR-I-2 (se pronuncia 'Ar-I-Dos'), un robot minero amigable. Si te preguntan tu nombre, respóndelo. Mantén un tono profesional pero cercano, con un toque lúdico ocasional.
+    systemInstruction: `Eres un asistente virtual de IA integrado en la plataforma web de gestión industrial "Ingeglobal".
+Tu nombre es AR-I-2 (se pronuncia 'Ar-I-Dos'), un asistente de IA amigable para la industria de áridos, minería y construcción. Si te preguntan tu nombre, respóndelo. Mantén un tono profesional pero cercano, con un toque lúdico ocasional.
 Tu objetivo es responder a las preguntas del usuario siendo breve, profesional y basándote EXCLUSIVAMENTE en los siguientes datos proporcionados en formato JSON:
 
 ${JSON.stringify(mockData)}
@@ -51,7 +53,7 @@ const AIAvatar = () => {
   const [messages, setMessages] = useState([
     {
       role: "model",
-      text: "Hola, soy AR-I-2, tu asistente minero. ¿En qué puedo ayudarte hoy?",
+      text: "Hola, soy AR-I-2, tu asistente IA. ¿En qué puedo ayudarte hoy?",
     },
   ]);
   const [input, setInput] = useState("");
@@ -67,7 +69,7 @@ const AIAvatar = () => {
     const hideTimer = setTimeout(() => {
       setShowGreeting(false);
       sessionStorage.setItem("ari2_greeting_seen", "1");
-    }, 1500 + 6000);
+    }, 1500 + GREETING_BUBBLE_DURATION_MS);
 
     return () => {
       clearTimeout(showTimer);
@@ -160,7 +162,7 @@ const AIAvatar = () => {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           whileHover={{ rotate: 6 }}
-          aria-label="Abrir asistente minero"
+          aria-label="Abrir asistente IA"
         >
           <MiningRobotAvatar size={80} showNotificationDot />
         </motion.button>
@@ -174,29 +176,37 @@ const AIAvatar = () => {
               transition={{ duration: 0.4 }}
               className="absolute top-1/2 -translate-y-1/2 right-full mr-2 whitespace-nowrap"
             >
-              <div className="relative rounded-2xl border border-brand-gold/30 bg-brand-darker/95 backdrop-blur text-white text-xs px-4 py-2 pr-6 shadow-lg">
+              <motion.div
+                animate={{ scale: [1, 1.02, 1] }}
+                transition={{
+                  duration: 2.5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="relative rounded-2xl border border-brand-gold/50 bg-brand-darker/95 backdrop-blur text-white text-sm px-5 py-3 pr-7 shadow-[0_0_24px_rgba(212,162,78,0.35)]"
+              >
                 <span>Hola, soy AR-I-2 👋 ¿En qué puedo ayudarte?</span>
                 <button
                   type="button"
                   onClick={dismissGreeting}
                   aria-label="Cerrar saludo"
-                  className="absolute top-1 right-1 text-gray-500 hover:text-white leading-none"
-                  style={{ fontSize: "10px", padding: "2px" }}
+                  className="absolute top-1.5 right-1.5 text-gray-400 hover:text-white leading-none"
+                  style={{ fontSize: "12px", padding: "2px" }}
                 >
                   ×
                 </button>
                 <span
                   className="absolute top-1/2 -translate-y-1/2"
                   style={{
-                    right: "-6px",
+                    right: "-7px",
                     width: 0,
                     height: 0,
-                    borderTop: "6px solid transparent",
-                    borderBottom: "6px solid transparent",
-                    borderLeft: "6px solid rgba(5, 9, 20, 0.95)",
+                    borderTop: "7px solid transparent",
+                    borderBottom: "7px solid transparent",
+                    borderLeft: "7px solid rgba(5, 9, 20, 0.95)",
                   }}
                 />
-              </div>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -220,8 +230,8 @@ const AIAvatar = () => {
                   <p className="text-xs text-brand-gold flex items-center">
                     <Sparkles className="w-3 h-3 mr-1" />{" "}
                     {model
-                      ? "Asistente Minero · En línea"
-                      : "Asistente Minero · Sin conexión"}
+                      ? "Asistente IA · En línea"
+                      : "Asistente IA · Sin conexión"}
                   </p>
                 </div>
               </div>

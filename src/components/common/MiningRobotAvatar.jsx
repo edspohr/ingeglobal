@@ -96,7 +96,7 @@ const MiningRobotAvatar = ({
         <motion.div
           className="absolute pointer-events-none flex justify-between"
           style={{
-            top: `${size * 0.37}px`,
+            top: `${size * 0.33}px`,
             left: `${size * 0.17}px`,
             width: `${size * 0.66}px`,
             height: `${size * 0.22}px`,
