@@ -39,23 +39,23 @@ const DashboardHome = () => {
 
        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
            {/* KPI 1: Tasa de Flujo (Convertida) */}
-           <Link to="/cintas" className="block transform transition hover:scale-105">
-                <MetricCard 
-                    title="Flujo Volumétrico" 
-                    value={`${flowRateM3H} m³/h`} 
+           <Link to="/dashboard/cintas" className="block transform transition hover:scale-105">
+                <MetricCard
+                    title="Flujo Volumétrico"
+                    value={`${flowRateM3H} m³/h`}
                     trend="up"
                     trendValue="Live"
                     icon={Activity}
                     color="brand-gold"
                 />
            </Link>
-           
+
            {/* KPI 2: Stock Actual (Visible para todos, pero detalle restringido en módulo) */}
            {!isOperator && (
-             <Link to="/arcones" className="block transform transition hover:scale-105">
-                  <MetricCard 
-                      title="Stock Actual" 
-                      value={`${currentStock} m³`} 
+             <Link to="/dashboard/arcones" className="block transform transition hover:scale-105">
+                  <MetricCard
+                      title="Stock Actual"
+                      value={`${currentStock} m³`}
                       trend="down"
                       trendValue="-120 m³"
                       icon={Database}
@@ -65,22 +65,22 @@ const DashboardHome = () => {
            )}
 
             {/* KPI 3: Volumen Acumulado (Total Historico) */}
-            <div className="block transform transition hover:scale-105">
-                <MetricCard 
-                    title="Volumen Acumulado" 
-                    value={`${totalVolumeAcc} m³`} 
+            <Link to="/dashboard/arcones" className="block transform transition hover:scale-105">
+                <MetricCard
+                    title="Volumen Acumulado"
+                    value={`${totalVolumeAcc} m³`}
                     trend="up"
                     trendValue="Total Histórico"
                     icon={Database}
                     color="purple"
                 />
-            </div>
+            </Link>
 
             {/* KPI 4: Camiones */}
-            <Link to="/camiones" className="block transform transition hover:scale-105">
-                <MetricCard 
-                    title="Camiones Turno" 
-                    value={data.camiones.filter(t => t.time > '08:00').length} 
+            <Link to="/dashboard/camiones" className="block transform transition hover:scale-105">
+                <MetricCard
+                    title="Camiones Turno"
+                    value={data.camiones.filter(t => t.time > '08:00').length}
                     trend="up"
                     trendValue="En proceso"
                     icon={Truck}

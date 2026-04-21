@@ -6,3 +6,5 @@ dist-ssr
 .env
 legacy
 
+.vercel
+.env*.local

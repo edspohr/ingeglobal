@@ -45,11 +45,11 @@ const DashboardLayout = () => {
                 ${user?.role === 'manager' ? 'bg-gradient-to-br from-brand-gold to-yellow-600 text-black' : 
                   user?.role === 'admin' ? 'bg-gradient-to-br from-purple-600 to-purple-800 text-white' : 
                   'bg-gradient-to-br from-blue-600 to-blue-800 text-white'}`}>
-                {user?.name?.charAt(0)}
+                {user?.displayName?.charAt(0) ?? '?'}
               </div>
               {sidebarOpen && (
                 <div className="ml-3 overflow-hidden">
-                  <p className="text-sm font-semibold text-white truncate">{user?.name}</p>
+                  <p className="text-sm font-semibold text-white truncate">{user?.displayName ?? user?.email ?? 'Usuario'}</p>
                   <p className={`text-[10px] uppercase tracking-wider truncate font-bold
                     ${user?.role === 'manager' ? 'text-brand-gold' : 
                       user?.role === 'admin' ? 'text-purple-400' : 

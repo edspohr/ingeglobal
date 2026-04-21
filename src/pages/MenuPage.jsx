@@ -81,7 +81,7 @@ const MenuPage = () => {
         <header className="flex justify-between items-end mb-12 border-b border-white/5 pb-6">
             <div>
               <h1 className="text-4xl font-bold text-white tracking-tight mb-2">
-                Bienvenido, <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-gold to-yellow-200">{user?.name?.split(' ')[0]}</span>
+                Bienvenido, <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-gold to-yellow-200">{user?.displayName?.split(' ')[0] ?? 'Usuario'}</span>
               </h1>
               <div className="flex items-center space-x-3">
                  <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border
