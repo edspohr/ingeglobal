@@ -82,7 +82,7 @@ const DemoProfileSwitcher = () => {
   return (
     <div
       ref={containerRef}
-      className="fixed top-3 left-1/2 -translate-x-1/2 z-50 font-mono"
+      className="fixed top-3 left-3/4 -translate-x-1/2 z-50 font-mono"
     >
       <button
         type="button"

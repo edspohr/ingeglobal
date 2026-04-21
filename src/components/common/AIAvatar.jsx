@@ -14,7 +14,7 @@ if (apiKey) {
   model = genAI.getGenerativeModel({
     model: "gemini-2.5-flash-lite",
     systemInstruction: `Eres un asistente virtual de IA integrado en la plataforma web de gestión minera/industrial "Ingeglobal".
-Tu personaje es un robot minero amigable. Mantén un tono profesional pero cercano, con un toque lúdico ocasional.
+Tu nombre es AR-I-2 (se pronuncia 'Ar-I-Dos'), un robot minero amigable. Si te preguntan tu nombre, respóndelo. Mantén un tono profesional pero cercano, con un toque lúdico ocasional.
 Tu objetivo es responder a las preguntas del usuario siendo breve, profesional y basándote EXCLUSIVAMENTE en los siguientes datos proporcionados en formato JSON:
 
 ${JSON.stringify(mockData)}
@@ -51,12 +51,36 @@ const AIAvatar = () => {
   const [messages, setMessages] = useState([
     {
       role: "model",
-      text: "Hola, soy tu asistente minero. ¿Qué necesitas analizar hoy?",
+      text: "Hola, soy AR-I-2, tu asistente minero. ¿En qué puedo ayudarte hoy?",
     },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showGreeting, setShowGreeting] = useState(false);
   const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (sessionStorage.getItem("ari2_greeting_seen") === "1") return;
+
+    const showTimer = setTimeout(() => setShowGreeting(true), 1500);
+    const hideTimer = setTimeout(() => {
+      setShowGreeting(false);
+      sessionStorage.setItem("ari2_greeting_seen", "1");
+    }, 1500 + 6000);
+
+    return () => {
+      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
+    };
+  }, []);
+
+  const dismissGreeting = () => {
+    setShowGreeting(false);
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("ari2_greeting_seen", "1");
+    }
+  };
 
   const SUGGESTIONS = [
     "¿Cuál es el volumen diario actual?",
@@ -129,16 +153,54 @@ const AIAvatar = () => {
   return (
     <>
       {/* Floating Button */}
-      <motion.button
-        className="fixed bottom-6 right-6 z-50 flex items-center justify-center rounded-full hover:scale-105 transition-transform"
-        onClick={() => setIsOpen(true)}
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        whileHover={{ rotate: 6 }}
-        aria-label="Abrir asistente minero"
-      >
-        <MiningRobotAvatar size={64} showNotificationDot />
-      </motion.button>
+      <div className="fixed bottom-6 right-6 z-50">
+        <motion.button
+          className="relative flex items-center justify-center rounded-full hover:scale-105 transition-transform"
+          onClick={() => setIsOpen(true)}
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          whileHover={{ rotate: 6 }}
+          aria-label="Abrir asistente minero"
+        >
+          <MiningRobotAvatar size={80} showNotificationDot />
+        </motion.button>
+
+        <AnimatePresence>
+          {showGreeting && !isOpen && (
+            <motion.div
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, transition: { duration: 0.3 } }}
+              transition={{ duration: 0.4 }}
+              className="absolute top-1/2 -translate-y-1/2 right-full mr-2 whitespace-nowrap"
+            >
+              <div className="relative rounded-2xl border border-brand-gold/30 bg-brand-darker/95 backdrop-blur text-white text-xs px-4 py-2 pr-6 shadow-lg">
+                <span>Hola, soy AR-I-2 👋 ¿En qué puedo ayudarte?</span>
+                <button
+                  type="button"
+                  onClick={dismissGreeting}
+                  aria-label="Cerrar saludo"
+                  className="absolute top-1 right-1 text-gray-500 hover:text-white leading-none"
+                  style={{ fontSize: "10px", padding: "2px" }}
+                >
+                  ×
+                </button>
+                <span
+                  className="absolute top-1/2 -translate-y-1/2"
+                  style={{
+                    right: "-6px",
+                    width: 0,
+                    height: 0,
+                    borderTop: "6px solid transparent",
+                    borderBottom: "6px solid transparent",
+                    borderLeft: "6px solid rgba(5, 9, 20, 0.95)",
+                  }}
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* Chat Interface Modal/Popover */}
       <AnimatePresence>
@@ -154,10 +216,12 @@ const AIAvatar = () => {
               <div className="flex items-center space-x-3">
                 <MiningRobotAvatar size={40} />
                 <div>
-                  <h3 className="font-bold text-white">Asistente Minero IA</h3>
+                  <h3 className="font-bold text-white">AR-I-2</h3>
                   <p className="text-xs text-brand-gold flex items-center">
                     <Sparkles className="w-3 h-3 mr-1" />{" "}
-                    {model ? "En línea" : "Sin conexión"}
+                    {model
+                      ? "Asistente Minero · En línea"
+                      : "Asistente Minero · Sin conexión"}
                   </p>
                 </div>
               </div>

@@ -25,6 +25,7 @@ const MiningRobotAvatar = ({
         try {
           await eyeControls.start({
             scaleY: [1, 0.1, 1],
+            opacity: [0, 1, 0],
             transition: { duration: 0.15, times: [0, 0.5, 1] },
           });
         } catch {
@@ -102,15 +103,14 @@ const MiningRobotAvatar = ({
             transformOrigin: "center",
           }}
           animate={eyeControls}
-          initial={{ scaleY: 1 }}
+          initial={{ scaleY: 1, opacity: 0 }}
         >
           <span
             className="block rounded-full"
             style={{
               width: `${size * 0.22}px`,
               height: "100%",
-              background:
-                "radial-gradient(circle, rgba(96,165,250,0.40) 0%, #2A1810 78%)",
+              background: "#1A1008",
             }}
           />
           <span
@@ -118,8 +118,7 @@ const MiningRobotAvatar = ({
             style={{
               width: `${size * 0.22}px`,
               height: "100%",
-              background:
-                "radial-gradient(circle, rgba(96,165,250,0.40) 0%, #2A1810 78%)",
+              background: "#1A1008",
             }}
           />
         </motion.div>
