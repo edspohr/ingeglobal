@@ -63,31 +63,31 @@ const DashboardLayout = () => {
         </div>
 
         <nav className="flex-1 overflow-y-auto py-6 px-3">
-          <SidebarItem icon={LayoutDashboard} label={sidebarOpen ? "Visión General" : ""} path="/" active={location.pathname === '/'} />
-          
+          <SidebarItem icon={LayoutDashboard} label={sidebarOpen ? "Visión General" : ""} path="/dashboard" active={location.pathname === '/dashboard'} />
+
           <div className="mt-4 mb-2 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
             {sidebarOpen ? 'Módulos Operativos' : '---'}
           </div>
 
-          <SidebarItem icon={Activity} label={sidebarOpen ? "Cintas & Caudal" : ""} path="/cintas" active={location.pathname.includes('cintas')} />
-          
+          <SidebarItem icon={Activity} label={sidebarOpen ? "Cintas & Caudal" : ""} path="/dashboard/cintas" active={location.pathname.includes('cintas')} />
+
           {/* Modules restricted for Operators */}
           {user?.role !== 'operator' && (
             <>
-              <SidebarItem icon={Database} label={sidebarOpen ? "Control Arcones" : ""} path="/arcones" active={location.pathname.includes('arcones')} />
-              <SidebarItem icon={Layers} label={sidebarOpen ? "Monitoreo Buzones" : ""} path="/buzones" active={location.pathname.includes('buzones')} />
-              <SidebarItem icon={Box} label={sidebarOpen ? "Acopios Planta" : ""} path="/acopios" active={location.pathname.includes('acopios')} />
+              <SidebarItem icon={Database} label={sidebarOpen ? "Control Arcones" : ""} path="/dashboard/arcones" active={location.pathname.includes('arcones')} />
+              <SidebarItem icon={Layers} label={sidebarOpen ? "Monitoreo Buzones" : ""} path="/dashboard/buzones" active={location.pathname.includes('buzones')} />
+              <SidebarItem icon={Box} label={sidebarOpen ? "Acopios Planta" : ""} path="/dashboard/acopios" active={location.pathname.includes('acopios')} />
             </>
           )}
 
-          <SidebarItem icon={Truck} label={sidebarOpen ? "Gestión Camiones" : ""} path="/camiones" active={location.pathname.includes('camiones')} />
-          
+          <SidebarItem icon={Truck} label={sidebarOpen ? "Gestión Camiones" : ""} path="/dashboard/camiones" active={location.pathname.includes('camiones')} />
+
           {user?.role === 'admin' && (
              <>
                <div className="mt-4 mb-2 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   {sidebarOpen ? 'Administración' : '---'}
                </div>
-               <SidebarItem icon={Users} label={sidebarOpen ? "Gestión Global" : ""} path="/admin" active={location.pathname.includes('admin')} />
+               <SidebarItem icon={Users} label={sidebarOpen ? "Gestión Global" : ""} path="/dashboard/admin" active={location.pathname.includes('admin')} />
              </>
           )}
         </nav>

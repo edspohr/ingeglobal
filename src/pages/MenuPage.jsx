@@ -15,8 +15,8 @@ const MenuPage = () => {
       id: 'cintas', 
       label: 'Cintas & Caudal', 
       desc: 'Monitoreo en tiempo real de flujo y transporte via correas.',
-      icon: Activity, 
-      path: '/cintas', 
+      icon: Activity,
+      path: '/dashboard/cintas',
       color: 'text-brand-gold', 
       bg: 'bg-brand-gold/10',
       border: 'border-brand-gold/20',
@@ -26,8 +26,8 @@ const MenuPage = () => {
       id: 'arcones', 
       label: 'Control Arcones', 
       desc: 'Niveles de llenado',
-      icon: Database, 
-      path: '/arcones',
+      icon: Database,
+      path: '/dashboard/arcones',
       color: 'text-blue-400', 
       bg: 'bg-blue-500/10',
       border: 'border-blue-500/20',
@@ -37,8 +37,8 @@ const MenuPage = () => {
       id: 'camiones', 
       label: 'Gestión Camiones', 
       desc: 'Entrada/Salida y tonelaje.',
-      icon: Truck, 
-      path: '/camiones',
+      icon: Truck,
+      path: '/dashboard/camiones',
       color: 'text-purple-400', 
       bg: 'bg-purple-500/10',
       border: 'border-purple-500/20',
@@ -48,8 +48,8 @@ const MenuPage = () => {
       id: 'buzones', 
       label: 'Buzones', 
       desc: 'Estado de compuertas',
-      icon: Layers, 
-      path: '/buzones',
+      icon: Layers,
+      path: '/dashboard/buzones',
       color: 'text-emerald-400', 
       bg: 'bg-emerald-500/10',
       border: 'border-emerald-500/20',
@@ -59,8 +59,8 @@ const MenuPage = () => {
       id: 'acopios', 
       label: 'Acopios Planta', 
       desc: 'Volumetría aérea',
-      icon: Database, 
-      path: '/acopios',
+      icon: Database,
+      path: '/dashboard/acopios',
       color: 'text-orange-400', 
       bg: 'bg-orange-500/10',
       border: 'border-orange-500/20',
@@ -178,7 +178,7 @@ const MenuPage = () => {
                  Panel de Administración
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <Link to="/admin" className="flex items-center p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-brand-gold/30 transition-all group">
+                  <Link to="/dashboard/admin" className="flex items-center p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-brand-gold/30 transition-all group">
                      <div className="p-3 bg-blue-500/10 rounded-lg mr-4 group-hover:bg-blue-500/20">
                         <Users className="text-blue-400" size={24} />
                      </div>
@@ -188,7 +188,7 @@ const MenuPage = () => {
                      </div>
                   </Link>
 
-                  <Link to="/admin" className="flex items-center p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-brand-gold/30 transition-all group">
+                  <Link to="/dashboard/admin" className="flex items-center p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-brand-gold/30 transition-all group">
                      <div className="p-3 bg-purple-500/10 rounded-lg mr-4 group-hover:bg-purple-500/20">
                         <Briefcase className="text-purple-400" size={24} />
                      </div>
@@ -198,7 +198,7 @@ const MenuPage = () => {
                      </div>
                   </Link>
 
-                  <Link to="/admin" className="flex items-center p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-brand-gold/30 transition-all group">
+                  <Link to="/dashboard/admin" className="flex items-center p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-brand-gold/30 transition-all group">
                      <div className="p-3 bg-emerald-500/10 rounded-lg mr-4 group-hover:bg-emerald-500/20">
                         <Key className="text-emerald-400" size={24} />
                      </div>
