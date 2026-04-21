@@ -72,7 +72,7 @@ const AdminPanel = () => {
                 </thead>
                 <tbody className="divide-y divide-white/5 text-sm text-gray-300">
                     {MOCK_USERS_LIST.map(u => (
-                        <tr key={u.id} className="hover:bg-white/5 transition-colors">
+                        <tr key={u.id} className="cursor-pointer transition-all duration-200 border-l-2 border-l-transparent hover:bg-white/5 hover:translate-x-0.5 hover:border-l-brand-gold">
                             <td className="p-4 text-white font-medium">{u.name}</td>
                             <td className="p-4">
                                 <span className={`px-2 py-1 rounded text-xs font-bold 

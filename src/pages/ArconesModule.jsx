@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../services/mockApi';
 import { Database, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import SkeletonBlock from '../components/common/SkeletonBlock';
 
 const BunkerVisual = ({ data, index }) => {
   const percentage = (data.current / data.max) * 100;
@@ -87,7 +88,16 @@ const ArconesModule = () => {
       load();
     }, []);
   
-    if (loading) return <div>Cargando...</div>;
+    if (loading) return (
+        <div className="space-y-6">
+            <SkeletonBlock width={320} height={28} />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[0, 1, 2, 3, 4, 5].map((i) => (
+                    <SkeletonBlock key={i} height={320} className="w-full" rounded="rounded-2xl" />
+                ))}
+            </div>
+        </div>
+    );
 
     return (
         <div className="space-y-6">

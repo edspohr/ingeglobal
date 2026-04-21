@@ -4,6 +4,7 @@ import MetricCard from '../components/common/MetricCard';
 import FlowChart from '../components/visualizations/FlowChart';
 import { Activity, Clock, Calendar, BarChart2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import SkeletonBlock from '../components/common/SkeletonBlock';
 
 const CintasModule = () => {
   const [data, setData] = useState(null);
@@ -18,7 +19,27 @@ const CintasModule = () => {
     load();
   }, []);
 
-  if (loading) return <div>Cargando monitoreo...</div>;
+  if (loading) return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-end">
+        <div className="space-y-2">
+          <SkeletonBlock width={280} height={28} />
+          <SkeletonBlock width={360} height={14} />
+        </div>
+        <SkeletonBlock width={220} height={36} rounded="rounded-lg" />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[0, 1, 2, 3].map((i) => (
+          <SkeletonBlock key={i} height={112} className="w-full" rounded="rounded-xl" />
+        ))}
+      </div>
+      <SkeletonBlock height={300} className="w-full" rounded="rounded-xl" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <SkeletonBlock height={220} className="w-full" rounded="rounded-xl" />
+        <SkeletonBlock height={220} className="w-full" rounded="rounded-xl" />
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6">

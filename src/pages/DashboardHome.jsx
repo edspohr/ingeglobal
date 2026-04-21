@@ -1,9 +1,30 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import MetricCard from '../components/common/MetricCard';
 import { Activity, Database, Truck, Layers } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { mockSensorData } from '../data/mockData';
+import SkeletonBlock from '../components/common/SkeletonBlock';
+
+// Orchestration for the dashboard entry animation. staggerChildren makes
+// the KPI cards / lower panels cascade in sequence on first mount.
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
+};
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+};
+
+// Short synthetic series driving the sparkline glint in each KPI. Values
+// hand-picked so the trend direction matches the KPI's semantic (flow up,
+// stock down, accumulator up, trucks fluctuating up).
+const SPARK_FLOW = [58, 60, 59, 61, 63, 62, 65, 64];
+const SPARK_STOCK = [820, 810, 805, 800, 790, 780, 775, 770];
+const SPARK_ACC = [20800, 20950, 21100, 21200, 21280, 21320, 21380, 21400];
+const SPARK_TRUCKS = [6, 7, 7, 8, 9, 8, 9, 10];
 
 const DashboardHome = () => {
   const [data, setData] = useState(null);
@@ -18,7 +39,23 @@ const DashboardHome = () => {
     }, 500);
   }, []);
 
-  if (loading) return <div>Cargando dashboard...</div>;
+  if (loading) return (
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <SkeletonBlock width={420} height={32} />
+        <SkeletonBlock width={160} height={24} rounded="rounded-full" />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[0, 1, 2, 3].map((i) => (
+          <SkeletonBlock key={i} height={112} className="w-full" rounded="rounded-xl" />
+        ))}
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <SkeletonBlock height={220} className="w-full" rounded="rounded-xl" />
+        <SkeletonBlock height={220} className="w-full" rounded="rounded-xl" />
+      </div>
+    </div>
+  );
 
   const isOperator = user?.role === ROLES.OPERATOR;
   
@@ -37,9 +74,15 @@ const DashboardHome = () => {
             </span>
        </div>
 
-       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+       <motion.div
+         variants={containerVariants}
+         initial="hidden"
+         animate="visible"
+         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+       >
            {/* KPI 1: Tasa de Flujo (Convertida) */}
-           <Link to="/dashboard/cintas" className="block transform transition hover:scale-105">
+           <motion.div variants={itemVariants} whileHover={{ scale: 1.03 }}>
+             <Link to="/dashboard/cintas" className="block">
                 <MetricCard
                     title="Flujo Volumétrico"
                     value={`${flowRateM3H} m³/h`}
@@ -47,12 +90,15 @@ const DashboardHome = () => {
                     trendValue="Live"
                     icon={Activity}
                     color="brand-gold"
+                    sparklineData={SPARK_FLOW}
                 />
-           </Link>
+             </Link>
+           </motion.div>
 
            {/* KPI 2: Stock Actual (Visible para todos, pero detalle restringido en módulo) */}
            {!isOperator && (
-             <Link to="/dashboard/arcones" className="block transform transition hover:scale-105">
+             <motion.div variants={itemVariants} whileHover={{ scale: 1.03 }}>
+               <Link to="/dashboard/arcones" className="block">
                   <MetricCard
                       title="Stock Actual"
                       value={`${currentStock} m³`}
@@ -60,12 +106,15 @@ const DashboardHome = () => {
                       trendValue="-120 m³"
                       icon={Database}
                       color="blue"
+                      sparklineData={SPARK_STOCK}
                   />
-             </Link>
+               </Link>
+             </motion.div>
            )}
 
             {/* KPI 3: Volumen Acumulado (Total Historico) */}
-            <Link to="/dashboard/arcones" className="block transform transition hover:scale-105">
+            <motion.div variants={itemVariants} whileHover={{ scale: 1.03 }}>
+              <Link to="/dashboard/arcones" className="block">
                 <MetricCard
                     title="Volumen Acumulado"
                     value={`${totalVolumeAcc} m³`}
@@ -73,11 +122,14 @@ const DashboardHome = () => {
                     trendValue="Total Histórico"
                     icon={Database}
                     color="purple"
+                    sparklineData={SPARK_ACC}
                 />
-            </Link>
+              </Link>
+            </motion.div>
 
             {/* KPI 4: Camiones */}
-            <Link to="/dashboard/camiones" className="block transform transition hover:scale-105">
+            <motion.div variants={itemVariants} whileHover={{ scale: 1.03 }}>
+              <Link to="/dashboard/camiones" className="block">
                 <MetricCard
                     title="Camiones Turno"
                     value={data.camiones.filter(t => t.time > '08:00').length}
@@ -85,12 +137,19 @@ const DashboardHome = () => {
                     trendValue="En proceso"
                     icon={Truck}
                     color="emerald"
+                    sparklineData={SPARK_TRUCKS}
                 />
-           </Link>
-       </div>
+              </Link>
+            </motion.div>
+       </motion.div>
 
-       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="glass-panel p-6 rounded-xl relative overflow-hidden">
+       <motion.div
+         variants={containerVariants}
+         initial="hidden"
+         animate="visible"
+         className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+       >
+            <motion.div variants={itemVariants} className="glass-panel p-6 rounded-xl relative overflow-hidden">
                 <h3 className="text-xl font-bold text-white mb-4">Avisos Recientes</h3>
                 <div className="space-y-4 relative z-10">
                     <div className="p-4 bg-white/5 rounded-lg border-l-4 border-brand-gold">
@@ -106,9 +165,9 @@ const DashboardHome = () => {
                 <div className="absolute right-0 top-0 p-10 opacity-5">
                     <Activity className="w-40 h-40 text-white" />
                 </div>
-            </div>
+            </motion.div>
 
-            <div className="glass-panel p-6 rounded-xl flex items-center justify-center bg-gradient-to-br from-brand-gold/10 to-transparent border border-brand-gold/20">
+            <motion.div variants={itemVariants} className="glass-panel p-6 rounded-xl flex items-center justify-center bg-gradient-to-br from-brand-gold/10 to-transparent border border-brand-gold/20">
                 <div className="text-center">
                     <h3 className="text-2xl font-bold text-white mb-2">Reporte de Turno</h3>
                     <p className="text-gray-400 mb-6 max-w-sm mx-auto">Descargue el informe consolidado de operación del turno actual (08:00 - 16:00).</p>
@@ -116,8 +175,8 @@ const DashboardHome = () => {
                         Generar PDF
                     </button>
                 </div>
-            </div>
-       </div>
+            </motion.div>
+       </motion.div>
     </div>
   );
 };

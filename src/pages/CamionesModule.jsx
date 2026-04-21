@@ -3,6 +3,7 @@ import { mockSensorData } from '../data/mockData';
 import { FileText, Download, Filter, Printer } from 'lucide-react';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import SkeletonBlock from '../components/common/SkeletonBlock';
 
 const CamionesModule = () => {
     const [data, setData] = useState([]);
@@ -63,7 +64,30 @@ const CamionesModule = () => {
         doc.save(`reporte_camiones_${period.toLowerCase()}.pdf`);
     };
 
-    if (loading) return <div>Cargando datos de transporte...</div>;
+    if (loading) return (
+        <div className="space-y-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="space-y-2">
+                    <SkeletonBlock width={320} height={28} />
+                    <SkeletonBlock width={420} height={14} />
+                </div>
+                <div className="flex gap-2">
+                    <SkeletonBlock width={130} height={40} rounded="rounded-lg" />
+                    <SkeletonBlock width={110} height={40} rounded="rounded-lg" />
+                </div>
+            </div>
+            <div className="glass-panel rounded-xl overflow-hidden border border-white/5">
+                <div className="p-4 border-b border-white/5">
+                    <SkeletonBlock width={256} height={36} rounded="rounded-lg" />
+                </div>
+                <div className="p-4 space-y-3">
+                    {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+                        <SkeletonBlock key={i} height={44} className="w-full" />
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
 
     return (
         <div className="space-y-6">
@@ -118,7 +142,7 @@ const CamionesModule = () => {
                         </thead>
                         <tbody className="divide-y divide-white/5 text-sm">
                             {data.map((truck, idx) => (
-                                <tr key={truck.id} className="hover:bg-white/5 transition-colors group">
+                                <tr key={truck.id} className="group cursor-pointer transition-all duration-200 border-l-2 border-l-transparent hover:bg-white/5 hover:translate-x-0.5 hover:border-l-brand-gold">
                                     <td className="p-4 font-mono text-gray-500">{truck.id}</td>
                                     <td className="p-4 font-bold text-white">{truck.plate}</td>
                                     <td className="p-4 text-gray-300">{truck.company}</td>

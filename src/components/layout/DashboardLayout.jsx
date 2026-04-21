@@ -1,8 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
-import { LogOut, Bell, LayoutDashboard, Activity, Database, Truck, Box, Layers, Users } from 'lucide-react'; 
+import { LogOut, Bell, LayoutDashboard, Activity, Database, Truck, Box, Layers, Users } from 'lucide-react';
 import AIAvatar from '../common/AIAvatar';
+import { getInitials } from '../../lib/formatUser';
+
+const BREADCRUMB_LABELS = {
+  cintas: 'Cintas & Caudal',
+  arcones: 'Control Arcones',
+  camiones: 'Gestión Camiones',
+  buzones: 'Monitoreo Buzones',
+  acopios: 'Acopios Planta',
+  admin: 'Gestión Global',
+};
+
+// Derives the sub-section label (if any) from a pathname like "/dashboard/cintas".
+// Returns null for the dashboard root or any unknown segment, so callers can fall
+// back to just "Panel de Control".
+const getBreadcrumbSubLabel = (pathname) => {
+  if (typeof pathname !== 'string') return null;
+  const segments = pathname.split('/').filter(Boolean);
+  if (segments.length < 2 || segments[0] !== 'dashboard') return null;
+  return BREADCRUMB_LABELS[segments[1]] ?? null;
+};
 
 const SidebarItem = ({ icon: Icon, label, path, onClick, active }) => (
   <Link 
@@ -19,11 +40,45 @@ const SidebarItem = ({ icon: Icon, label, path, onClick, active }) => (
   </Link>
 );
 
+const SYNC_CYCLE_SECONDS = 45;
+
 const DashboardLayout = () => {
   const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [now, setNow] = useState(() => new Date());
+  const [secondsSinceSync, setSecondsSinceSync] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Live clock + simulated sync-cycle counter. Two independent intervals so
+  // one can be tuned without affecting the other. Both cleared on unmount
+  // to avoid setState-after-unmount warnings and memory leaks.
+  useEffect(() => {
+    const clockId = setInterval(() => setNow(new Date()), 1000);
+    const syncId = setInterval(
+      () => setSecondsSinceSync((s) => (s + 1) % SYNC_CYCLE_SECONDS),
+      1000,
+    );
+    return () => {
+      clearInterval(clockId);
+      clearInterval(syncId);
+    };
+  }, []);
+
+  const breadcrumbSubLabel = getBreadcrumbSubLabel(location.pathname);
+
+  const timeStr = now.toLocaleTimeString('es-CL', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+  const dateStr = now.toLocaleDateString('es-CL', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 
   const handleLogout = () => {
     logout();
@@ -45,7 +100,7 @@ const DashboardLayout = () => {
                 ${user?.role === 'manager' ? 'bg-gradient-to-br from-brand-gold to-yellow-600 text-black' : 
                   user?.role === 'admin' ? 'bg-gradient-to-br from-purple-600 to-purple-800 text-white' : 
                   'bg-gradient-to-br from-blue-600 to-blue-800 text-white'}`}>
-                {user?.displayName?.charAt(0) ?? '?'}
+                {getInitials(user?.displayName)}
               </div>
               {sidebarOpen && (
                 <div className="ml-3 overflow-hidden">
@@ -105,8 +160,27 @@ const DashboardLayout = () => {
         <header className="h-20 glass-panel border-b border-white/5 flex items-center justify-between px-8 z-10 sticky top-0">
           <div className="flex items-center gap-6">
             <div>
-              <h2 className="text-xl font-bold text-white">{sidebarOpen ? 'Panel de Control' : ''}</h2>
-              <p className="text-xs text-gray-500 mt-0.5">{new Date().toLocaleDateString('es-CL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+              <h2 className="text-xl font-bold">
+                <span className="text-white">Panel de Control</span>
+                {breadcrumbSubLabel && (
+                  <>
+                    <span className="text-gray-600 mx-2">›</span>
+                    <span className="text-brand-gold">{breadcrumbSubLabel}</span>
+                  </>
+                )}
+              </h2>
+              <div className="flex items-center gap-3 mt-0.5">
+                <p className="text-xs text-gray-500">{dateStr}</p>
+                <span className="text-gray-700">·</span>
+                <span className="font-mono text-xs text-white tabular-nums">{timeStr}</span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-[10px] uppercase tracking-widest text-green-400">EN VIVO</span>
+                </span>
+              </div>
+              <p className="text-[10px] text-gray-600 mt-0.5 font-mono">
+                Última sincronización: hace {secondsSinceSync}s
+              </p>
             </div>
 
             {/* Admin Company Selector */}
@@ -132,9 +206,18 @@ const DashboardLayout = () => {
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-8 scroll-smooth">
-          <Outlet />
-        </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            className="flex-1 overflow-y-auto p-8 scroll-smooth"
+          >
+            <Outlet />
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       

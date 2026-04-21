@@ -91,13 +91,13 @@ const MiningRobotAvatar = ({
         />
 
         {/* Eye blink overlays — two circles covering the robot's blue eyes
-            (centers at ~33%/~67% x, ~48% y, radius ~11%) */}
+            (centers at ~28%/~72% x, ~48% y, radius ~11%) */}
         <motion.div
           className="absolute pointer-events-none flex justify-between"
           style={{
             top: `${size * 0.37}px`,
-            left: `${size * 0.22}px`,
-            width: `${size * 0.56}px`,
+            left: `${size * 0.17}px`,
+            width: `${size * 0.66}px`,
             height: `${size * 0.22}px`,
             transformOrigin: "center",
           }}

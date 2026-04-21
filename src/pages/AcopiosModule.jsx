@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../services/mockApi';
 import { MapPin, Info } from 'lucide-react';
 import { motion } from 'framer-motion';
+import SkeletonBlock from '../components/common/SkeletonBlock';
 
 const AcopiosModule = () => {
     const [data, setData] = useState(null);
@@ -17,7 +18,20 @@ const AcopiosModule = () => {
       load();
     }, []);
   
-    if (loading) return <div>Cargando...</div>;
+    if (loading) return (
+        <div className="space-y-6">
+            <SkeletonBlock width={320} height={28} />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <SkeletonBlock className="lg:col-span-2 w-full h-[400px] lg:h-[500px]" rounded="rounded-xl" />
+                <div className="glass-panel p-6 rounded-xl flex flex-col space-y-4">
+                    <SkeletonBlock width={200} height={20} />
+                    {[0, 1, 2, 3].map((i) => (
+                        <SkeletonBlock key={i} height={96} className="w-full" />
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
 
     return (
         <div className="space-y-6">

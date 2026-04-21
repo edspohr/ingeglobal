@@ -82,7 +82,7 @@ const DemoProfileSwitcher = () => {
   return (
     <div
       ref={containerRef}
-      className="fixed top-4 right-4 z-50 font-mono"
+      className="fixed top-3 left-1/2 -translate-x-1/2 z-50 font-mono"
     >
       <button
         type="button"
@@ -102,7 +102,7 @@ const DemoProfileSwitcher = () => {
       {open && (
         <div
           role="listbox"
-          className="glass-panel mt-2 w-64 rounded-xl border border-brand-gold/30 bg-brand-darker/90 backdrop-blur-md overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.55)]"
+          className="glass-panel absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 rounded-xl border border-brand-gold/30 bg-brand-darker/90 backdrop-blur-md overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.55)]"
         >
           <div className="px-3 py-2 text-[10px] uppercase tracking-widest text-brand-gold/70 border-b border-brand-gold/15">
             Seleccionar Perfil

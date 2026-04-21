@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/mockApi';
 import { Layers, AlertOctagon, CheckCircle2 } from 'lucide-react';
+import SkeletonBlock from '../components/common/SkeletonBlock';
 
 const BuzonesModule = () => {
     const [data, setData] = useState(null);
@@ -15,7 +16,15 @@ const BuzonesModule = () => {
       load();
     }, []);
   
-    if (loading) return <div>Cargando...</div>;
+    if (loading) return (
+        <div className="space-y-6">
+            <SkeletonBlock width={320} height={28} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <SkeletonBlock height={420} className="w-full" rounded="rounded-2xl" />
+                <SkeletonBlock height={420} className="w-full" rounded="rounded-2xl" />
+            </div>
+        </div>
+    );
 
     const isFlowing = data.status === 'flowing';
     const isBlocked = data.status === 'blocked';
