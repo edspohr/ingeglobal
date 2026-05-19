@@ -1,13 +1,13 @@
 import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-const CustomTooltip = ({ active, payload, label }) => {
+const CustomTooltip = ({ active, payload, label, unit }) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-brand-dark/90 border border-white/10 p-3 rounded-lg shadow-xl backdrop-blur-md">
         <p className="text-gray-400 text-xs mb-1">{label}</p>
         <p className="text-brand-gold font-bold text-lg">
-          {payload[0].value} <span className="text-xs text-gray-500">m³/min</span>
+          {payload[0].value?.toLocaleString('es-CL')} <span className="text-xs text-gray-500">{unit}</span>
         </p>
       </div>
     );
@@ -15,7 +15,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-const FlowChart = ({ data }) => {
+const FlowChart = ({ data, unit = 'm³/h' }) => {
   return (
     <div className="w-full h-[300px]">
       <ResponsiveContainer width="100%" height="100%">
@@ -43,7 +43,7 @@ const FlowChart = ({ data }) => {
             tickLine={false}
             axisLine={false}
           />
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={<CustomTooltip unit={unit} />} />
           <Area 
             type="monotone" 
             dataKey="value" 

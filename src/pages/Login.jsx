@@ -2,14 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, User, ArrowRight, ShieldCheck, RefreshCw, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, ArrowRight, ShieldCheck, RefreshCw, AlertCircle, ArrowLeft } from 'lucide-react';
 
 const Login = () => {
-  const { login, register, resetPassword, loginWithGoogle } = useAuth();
-  const [mode, setMode] = useState('login'); // 'login' | 'register' | 'reset'
+  const { login, resetPassword, loginWithGoogle } = useAuth();
+  const [mode, setMode] = useState('login'); // 'login' | 'reset'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -26,12 +25,6 @@ const Login = () => {
       if (mode === 'login') {
         result = await login(email, password);
         if (result.success) navigate('/dashboard');
-      } else if (mode === 'register') {
-        if (password !== confirmPassword) {
-          throw new Error("Las contraseñas no coinciden");
-        }
-        result = await register(email, password);
-        if (result.success) navigate('/complete-profile');
       } else if (mode === 'reset') {
         result = await resetPassword(email);
         if (result.success) setMessage("Se ha enviado un correo para restablecer tu contraseña.");
@@ -113,14 +106,10 @@ const Login = () => {
 
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-white mb-2 tracking-tight">
-              {mode === 'login' && 'Bienvenido de Nuevo'}
-              {mode === 'register' && 'Crear Cuenta Industrial'}
-              {mode === 'reset' && 'Recuperar Acceso'}
+              {mode === 'login' ? 'Bienvenido de Nuevo' : 'Recuperar Acceso'}
             </h2>
             <p className="text-gray-400 text-sm">
-              {mode === 'login' && 'Ingrese sus credenciales para acceder al portal.'}
-              {mode === 'register' && 'Únase a la red de inteligencia de Ingeglobal.'}
-              {mode === 'reset' && 'Le enviaremos un enlace de recuperación.'}
+              {mode === 'login' ? 'Ingrese sus credenciales para acceder al portal.' : 'Le enviaremos un enlace de recuperación.'}
             </p>
           </div>
 
@@ -139,8 +128,8 @@ const Login = () => {
                 />
               </div>
 
-              {/* Password Inputs */}
-              {mode !== 'reset' && (
+              {/* Password — hidden on reset mode */}
+              {mode === 'login' && (
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
                   <input
@@ -149,20 +138,6 @@ const Login = () => {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-brand-dark/50 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white placeholder:text-gray-600 focus:outline-none focus:border-brand-gold/50 transition-colors"
-                  />
-                </div>
-              )}
-
-              {mode === 'register' && (
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                  <input
-                    type="password"
-                    placeholder="Confirmar Contraseña"
-                    required
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
                     className="w-full bg-brand-dark/50 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white placeholder:text-gray-600 focus:outline-none focus:border-brand-gold/50 transition-colors"
                   />
                 </div>
@@ -204,11 +179,7 @@ const Login = () => {
                 <RefreshCw className="w-5 h-5 animate-spin" />
               ) : (
                 <>
-                  <span>
-                    {mode === 'login' && 'Ingresar al Sistema'}
-                    {mode === 'register' && 'Registrarse'}
-                    {mode === 'reset' && 'Enviar Instrucciones'}
-                  </span>
+                  <span>{mode === 'login' ? 'Ingresar al Sistema' : 'Enviar Instrucciones'}</span>
                   <ArrowRight className="w-5 h-5" />
                 </>
               )}
@@ -235,27 +206,19 @@ const Login = () => {
           </form>
 
           {/* Secondary Actions */}
-          <div className="mt-8 pt-6 border-t border-white/5 space-y-4">
+          <div className="mt-8 pt-6 border-t border-white/5">
             {mode === 'login' ? (
-              <>
-                <div className="flex items-center justify-between text-xs">
-                  <button 
-                    onClick={() => toggleMode('reset')}
-                    className="text-gray-500 hover:text-brand-gold transition-colors"
-                  >
-                    ¿Olvidó su contraseña?
-                  </button>
-                  <button 
-                    onClick={() => toggleMode('register')}
-                    className="text-brand-gold hover:underline font-semibold"
-                  >
-                    Registrarse ahora
-                  </button>
-                </div>
-              </>
+              <div className="text-center">
+                <button
+                  onClick={() => toggleMode('reset')}
+                  className="text-xs text-gray-500 hover:text-brand-gold transition-colors"
+                >
+                  ¿Olvidó su contraseña?
+                </button>
+              </div>
             ) : (
               <div className="text-center">
-                <button 
+                <button
                   onClick={() => toggleMode('login')}
                   className="text-xs text-gray-500 hover:text-white transition-colors flex items-center justify-center gap-1 w-full"
                 >
@@ -267,16 +230,7 @@ const Login = () => {
           </div>
         </motion.div>
         
-        <div className="mt-6 text-center space-y-2">
-          <p className="text-xs text-gray-600">
-            ¿No tienes acceso?{' '}
-            <Link
-              to="/#contacto"
-              className="text-brand-gold hover:underline font-semibold"
-            >
-              Solicita una demo
-            </Link>
-          </p>
+        <div className="mt-6 text-center">
           <p className="text-[10px] text-gray-700 uppercase tracking-widest">
             Ingeglobal Industrial Dashboard • v2.0
           </p>
