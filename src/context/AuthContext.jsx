@@ -39,7 +39,6 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        // User is signed in, fetch Firestore data
         try {
           const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
           if (userDoc.exists()) {
@@ -49,12 +48,16 @@ export const AuthProvider = ({ children }) => {
               ...userDoc.data(),
             });
           } else {
-            // Document doesn't exist yet (should happen during sign up flow)
+            // Firebase Auth account exists but no Firestore document yet.
+            // Treat as a pre-provisioned account (e.g. created via Firebase console)
+            // so they land on /complete-profile to fill in their details.
             setUser({
               uid: firebaseUser.uid,
               email: firebaseUser.email,
               role: ROLES.GUEST,
               status: STATUS.PENDING,
+              displayName: firebaseUser.displayName ?? null,
+              jobTitle: null,
             });
           }
         } catch (error) {
@@ -62,9 +65,10 @@ export const AuthProvider = ({ children }) => {
           setUser(null);
         }
       } else {
-        // User is signed out
         setUser(null);
       }
+      // Always set loading false AFTER user state is fully resolved,
+      // so ProtectedRoute never evaluates a half-loaded user object.
       setLoading(false);
     });
 

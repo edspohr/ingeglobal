@@ -27,20 +27,23 @@ const ProtectedRoute = ({ children }) => {
       </div>
     </div>
   );
-  
+
   // 1. Not authenticated
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // 2. Profile incomplete (Check for fields from CompleteProfile.jsx)
-  const isProfileIncomplete = !user.displayName || !user.jobTitle;
+  // 2. Admins always go straight through — no profile gate
+  const isAdmin = user.role === 'admin';
+
+  // 3. Profile incomplete — only block non-admins who are missing fields
+  const isProfileIncomplete = !isAdmin && (!user.displayName || !user.jobTitle);
   if (isProfileIncomplete && location.pathname !== '/complete-profile') {
     return <Navigate to="/complete-profile" replace />;
   }
 
-  // 3. Authenticated but access still pending
-  if (user.status === STATUS.PENDING && location.pathname !== '/access-pending' && !isProfileIncomplete) {
+  // 4. Authenticated but access still pending
+  if (!isAdmin && user.status === STATUS.PENDING && location.pathname !== '/access-pending' && !isProfileIncomplete) {
     return <Navigate to="/access-pending" replace />;
   }
 
