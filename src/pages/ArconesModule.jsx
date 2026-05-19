@@ -1,114 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { api } from '../services/mockApi';
-import { Database, AlertTriangle } from 'lucide-react';
-import { motion } from 'framer-motion';
-import SkeletonBlock from '../components/common/SkeletonBlock';
+import React from 'react';
+import { Database, Radio } from 'lucide-react';
 
-const BunkerVisual = ({ data, index }) => {
-  const percentage = (data.current / data.max) * 100;
-  
-  // Color Logic: >70 Green, 50-70 Yellow, <50 Red
-  let fillColor = 'bg-green-500/60';
-  let isWarning = false;
-  let isCritical = false;
-
-  if (percentage < 50) {
-    fillColor = 'bg-red-500/60';
-    isCritical = true;
-  } else if (percentage <= 70) {
-    fillColor = 'bg-yellow-500/60';
-    isWarning = true;
-  }
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1 }}
-      className="glass-card p-6 flex flex-col justify-between h-80 relative overflow-hidden"
-    >
-      <div className="z-10 flex justify-between items-start">
-        <div>
-           <h3 className="text-xl font-bold text-white">Arcón {data.id}</h3>
-           <p className="text-brand-gold font-medium">{data.material}</p>
-        </div>
-        <div className="text-right">
-            <p className="text-2xl font-bold text-white">{data.current} <span className="text-sm text-gray-400">/ {data.max} m³</span></p>
-            <p className="text-xs text-gray-500">Capacidad Total</p>
-        </div>
-      </div>
-
-      {/* Visual Bar Container */}
-      <div className="flex-1 w-full bg-gray-800/50 rounded-lg mx-auto mt-6 mb-2 relative overflow-hidden border border-white/5">
-         {/* Liquid/Fill Level */}
-         <motion.div 
-            initial={{ height: 0 }}
-            animate={{ height: `${percentage}%` }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
-            className={`absolute bottom-0 left-0 w-full ${fillColor} backdrop-blur-sm transition-colors duration-500`}
-         >
-            {/* Wave Effect Mock */}
-            <div className="absolute top-0 w-full h-2 bg-white/20"></div>
-         </motion.div>
-         
-         {/* Grid Lines */}
-         <div className="absolute inset-0 flex flex-col justify-between py-2 px-2 pointer-events-none">
-             {[1,2,3,4].map(i => <div key={i} className="w-full border-t border-white/5 text-[10px] text-gray-600 pl-1">{100 - (i*20)}%</div>)}
-         </div>
-      </div>
-
-      <div className="z-10 flex justify-between items-center mt-2">
-         {isCritical ? (
-             <span className="flex items-center text-xs font-bold text-red-400 animate-pulse">
-                <AlertTriangle className="w-4 h-4 mr-1" /> NIVEL CRÍTICO
-             </span>
-         ) : isWarning ? (
-            <span className="flex items-center text-xs font-bold text-yellow-400">
-               <AlertTriangle className="w-4 h-4 mr-1" /> REVISAR NIVEL
-            </span>
-         ) : (
-             <div className="w-1 h-1"></div> // placeholder
-         )}
-         <span className="ml-auto text-xs text-gray-400">Consumo diario: <span className="text-white">{data.consumed} m³</span></span>
-      </div>
-    </motion.div>
-  );
-};
-
-const ArconesModule = () => {
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
-  
-    useEffect(() => {
-      const load = async () => {
-        const allModules = await api.data.getModules();
-        setData(allModules.arcones);
-        setLoading(false);
-      };
-      load();
-    }, []);
-  
-    if (loading) return (
-        <div className="space-y-6">
-            <SkeletonBlock width={320} height={28} />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[0, 1, 2, 3, 4, 5].map((i) => (
-                    <SkeletonBlock key={i} height={320} className="w-full" rounded="rounded-2xl" />
-                ))}
-            </div>
-        </div>
-    );
-
-    return (
-        <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-white tracking-tight">Control de Arcones</h1>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {data.map((item, index) => (
-                    <BunkerVisual key={item.id} data={item} index={index} />
-                ))}
-            </div>
-        </div>
-    );
-};
+const ArconesModule = () => (
+  <div className="space-y-6">
+    <h1 className="text-3xl font-bold text-white tracking-tight">Control de Arcones</h1>
+    <div className="glass-panel rounded-xl flex flex-col items-center justify-center py-24 text-center space-y-3">
+      <Radio size={28} className="text-gray-600" />
+      <p className="text-gray-400 text-sm font-medium">Sin datos en vivo</p>
+      <p className="text-gray-600 text-xs max-w-xs">
+        Los niveles de arcones aparecerán aquí automáticamente cuando el sistema de medición esté conectado.
+      </p>
+    </div>
+  </div>
+);
 
 export default ArconesModule;

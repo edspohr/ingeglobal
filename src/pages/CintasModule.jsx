@@ -2,7 +2,7 @@ import React from 'react';
 import { useLms511 } from '../hooks/useLms511';
 import MetricCard from '../components/common/MetricCard';
 import FlowChart from '../components/visualizations/FlowChart';
-import { Activity, Clock, Calendar, BarChart2, ChevronDown, Radio } from 'lucide-react';
+import { Activity, Clock, Calendar, BarChart2, Radio } from 'lucide-react';
 import { motion } from 'framer-motion';
 import SkeletonBlock from '../components/common/SkeletonBlock';
 
@@ -108,26 +108,6 @@ const CintasModule = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Sensor selector — only visible when multiple sensors exist */}
-          {sensors.length > 1 && (
-            <div className="relative">
-              <select
-                value={`${selectedSensor?.site}|${selectedSensor?.host}`}
-                onChange={(e) => {
-                  const [site, host] = e.target.value.split('|');
-                  setSelectedSensor({ site, host });
-                }}
-                className="appearance-none bg-brand-surface/60 border border-white/10 text-white text-sm rounded-lg px-3 py-2 pr-8 focus:outline-none focus:ring-1 focus:ring-brand-gold"
-              >
-                {sensors.map((s) => (
-                  <option key={`${s.site}|${s.host}`} value={`${s.site}|${s.host}`}>
-                    {s.host} — {s.site}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-            </div>
-          )}
 
           {/* Granularity filter */}
           <div className="flex bg-brand-surface/50 rounded-lg p-1 border border-white/5">
