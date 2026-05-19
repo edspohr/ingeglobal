@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, ArrowRight, ShieldCheck, RefreshCw, AlertCircle, ArrowLeft } from 'lucide-react';
 
 const Login = () => {
-  const { login, resetPassword, loginWithGoogle } = useAuth();
+  const { login, resetPassword, loginWithGoogle, user, loading: authLoading } = useAuth();
   const [mode, setMode] = useState('login'); // 'login' | 'reset'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,7 +24,7 @@ const Login = () => {
       let result;
       if (mode === 'login') {
         result = await login(email, password);
-        if (result.success) navigate('/dashboard');
+        // Navigation is handled by the useEffect below once auth state resolves
       } else if (mode === 'reset') {
         result = await resetPassword(email);
         if (result.success) setMessage("Se ha enviado un correo para restablecer tu contraseña.");
@@ -40,13 +40,18 @@ const Login = () => {
     }
   };
 
+  // Once auth resolves after login, redirect away from /login automatically
+  useEffect(() => {
+    if (!authLoading && user) navigate('/dashboard', { replace: true });
+  }, [authLoading, user, navigate]);
+
   const handleGoogleLogin = async () => {
     setError('');
     setLoading(true);
     try {
       const result = await loginWithGoogle();
-      if (result.success) navigate('/dashboard');
-      else setError(result.error);
+      if (!result.success) setError(result.error);
+      // navigation handled by the useEffect above
     } catch (e) {
       setError(e.message);
     } finally {

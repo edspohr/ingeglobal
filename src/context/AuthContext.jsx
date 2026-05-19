@@ -78,6 +78,9 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      // Do NOT return a navigate here — onAuthStateChanged will fire,
+      // fully resolve the Firestore profile, and ProtectedRoute will
+      // redirect once loading === false and user is complete.
       return { success: true };
     } catch (error) {
       console.error("Login Error:", error);
