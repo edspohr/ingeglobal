@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
-import { LogOut, Bell, LayoutDashboard, Activity, Database, Truck, Box, Layers, Users } from 'lucide-react';
+import { LogOut, LayoutDashboard, Activity, Database, Truck, Box, Layers, Users } from 'lucide-react';
 import AIAvatar from '../common/AIAvatar';
 import { getInitials } from '../../lib/formatUser';
 
@@ -183,27 +183,8 @@ const DashboardLayout = () => {
               </p>
             </div>
 
-            {/* Admin Company Selector */}
-            {user?.role === 'admin' && (
-              <div className="hidden md:flex items-center pl-6 border-l border-white/10">
-                 <div className="flex flex-col">
-                    <span className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold mb-1">Cliente Visualizado</span>
-                    <select className="bg-black/20 border border-white/10 rounded text-sm text-white px-2 py-1 outline-none focus:border-brand-gold cursor-pointer">
-                       <option>Ingeglobal Planta Central (Demo)</option>
-                       <option>Minera Escondida - Fase IV</option>
-                       <option>Codelco Andina - Chancado</option>
-                    </select>
-                 </div>
-              </div>
-            )}
           </div>
           
-          <div className="flex items-center space-x-4">
-             <button className="relative p-2 text-gray-400 hover:text-white transition-colors">
-                <Bell className="w-6 h-6" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-             </button>
-          </div>
         </header>
 
         <AnimatePresence mode="wait">
