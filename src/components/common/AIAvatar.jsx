@@ -2,32 +2,49 @@ import React, { useState, useRef, useEffect } from "react";
 import { X, Send, Sparkles, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import * as mockData from "../../data/mockData";
+import { useLms511 } from "../../hooks/useLms511";
 import MiningRobotAvatar from "./MiningRobotAvatar";
 
 const GREETING_BUBBLE_DURATION_MS = 12000;
 
-// Initialize Gemini
-// We only initialize the client if the API key is present
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
-let model = null;
-if (apiKey) {
-  const genAI = new GoogleGenerativeAI(apiKey);
-  model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash-lite",
-    systemInstruction: `Eres un asistente virtual de IA integrado en la plataforma web de gestión industrial "Ingeglobal".
-Tu nombre es AR-I-2 (se pronuncia 'Ar-I-Dos'), un asistente de IA amigable para la industria de áridos, minería y construcción. Si te preguntan tu nombre, respóndelo. Mantén un tono profesional pero cercano, con un toque lúdico ocasional.
-Tu objetivo es responder a las preguntas del usuario siendo breve, profesional y basándote EXCLUSIVAMENTE en los siguientes datos proporcionados en formato JSON:
 
-${JSON.stringify(mockData)}
+function buildSystemInstruction(latest, history) {
+  const now = new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" });
 
-Instrucciones adicionales:
-- No inventes incidentes, métricas o vehículos que no figuren en los datos.
-- Responde de forma fácil de leer: usa viñetas, saltos de línea y negritas para resaltar lo importante.
-- Si te hacen una pregunta fuera de contexto de las operaciones, métricas o la app, contesta amablemente que estás diseñado solo para asistir en esto.
-- Si el usuario te saluda, hazlo cordialmente.
-`,
-  });
+  const sensorBlock = latest
+    ? `## Estado actual del sensor (${latest.host} · ${latest.site})
+- Flujo volumétrico: ${latest.flow_m3_h?.toFixed(2)} m³/h (${latest.flow_m3_s?.toFixed(4)} m³/s)
+- Velocidad de cinta: ${latest.belt_speed_mps?.toFixed(2)} m/s
+- Volumen acumulado hoy: ${latest.volume_day_m3?.toFixed(1)} m³
+- Puntos válidos en última muestra: ${latest.valid_points ?? "—"}
+- Última medición del sensor: ${latest.source_created_at ? new Date(latest.source_created_at).toLocaleString("es-CL") : "—"}
+- Datos actualizados en plataforma: ${latest.updated_at ? new Date(latest.updated_at).toLocaleString("es-CL") : "—"}`
+    : "## Estado del sensor\nSin datos en vivo disponibles actualmente.";
+
+  const historyBlock = history?.length
+    ? `## Histórico reciente (últimos períodos)\n${history.map(r =>
+        `- ${r.bucket_label}: ${r.volume_m3?.toFixed(1)} m³ · flujo promedio ${r.avg_flow_m3_h?.toFixed(2)} m³/h`
+      ).join("\n")}`
+    : "## Histórico\nSin datos históricos disponibles actualmente.";
+
+  return `Eres AR-I-2 (se pronuncia 'Ar-I-Dos'), asistente de IA integrado en la plataforma industrial Ingeglobal.
+Fecha y hora actual: ${now}
+
+Responde de forma breve y profesional, usando viñetas y negritas para destacar lo importante.
+Basa tus respuestas EXCLUSIVAMENTE en los datos en tiempo real que se te proporcionan abajo.
+Si no hay datos disponibles para una pregunta, dilo claramente — nunca inventes cifras.
+Si te preguntan algo fuera del ámbito operacional de la plataforma, responde amablemente que solo puedes ayudar con eso.
+
+${sensorBlock}
+
+${historyBlock}
+
+## Módulos activos con datos reales
+- **Cintas & Caudal**: sensor LMS511 láser midiendo flujo volumétrico en cinta transportadora.
+
+## Módulos sin datos aún
+- Control de Arcones, Monitoreo de Buzones, Acopios, Gestión de Camiones: sin conexión a backend por ahora.`;
 }
 
 const formatText = (text) => {
@@ -48,7 +65,15 @@ const formatText = (text) => {
   ));
 };
 
+const SUGGESTIONS = [
+  "¿Cuál es el flujo actual de la cinta?",
+  "¿Cuánto volumen llevamos hoy?",
+  "¿Cómo ha sido la producción esta semana?",
+  "¿A qué velocidad va la cinta?",
+];
+
 const AIAvatar = () => {
+  const { latest, history } = useLms511();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
@@ -60,6 +85,17 @@ const AIAvatar = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showGreeting, setShowGreeting] = useState(false);
   const messagesEndRef = useRef(null);
+
+  // Build a fresh Gemini model instance each time latest/history changes
+  const modelRef = useRef(null);
+  useEffect(() => {
+    if (!apiKey) return;
+    const genAI = new GoogleGenerativeAI(apiKey);
+    modelRef.current = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash-lite",
+      systemInstruction: buildSystemInstruction(latest, history),
+    });
+  }, [latest, history]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -84,12 +120,6 @@ const AIAvatar = () => {
     }
   };
 
-  const SUGGESTIONS = [
-    "¿Cuál es el volumen diario actual?",
-    "¿Hay incidentes críticos reportados?",
-    "¿Qué camiones están procesando?",
-    "Resumen de los arcones",
-  ];
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -108,7 +138,7 @@ const AIAvatar = () => {
     setInput("");
     setIsLoading(true);
 
-    if (!model) {
+    if (!modelRef.current) {
       setMessages((prev) => [
         ...prev,
         {
@@ -121,13 +151,12 @@ const AIAvatar = () => {
     }
 
     try {
-      // Exclude the fixed first greeting from the history sent to the API
-      const history = messages.slice(1).map((msg) => ({
+      const chatHistory = messages.slice(1).map((msg) => ({
         role: msg.role === "model" ? "model" : "user",
         parts: [{ text: msg.text }],
       }));
 
-      const chat = model.startChat({ history });
+      const chat = modelRef.current.startChat({ history: chatHistory });
       const result = await chat.sendMessage([{ text }]);
       const responseText = result.response.text();
 
@@ -229,9 +258,7 @@ const AIAvatar = () => {
                   <h3 className="font-bold text-white">AR-I-2</h3>
                   <p className="text-xs text-brand-gold flex items-center">
                     <Sparkles className="w-3 h-3 mr-1" />{" "}
-                    {model
-                      ? "Asistente IA · En línea"
-                      : "Asistente IA · Sin conexión"}
+                    {apiKey ? "Asistente IA · En línea" : "Asistente IA · Sin conexión"}
                   </p>
                 </div>
               </div>
