@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Search, RefreshCw, AlertCircle } from 'lucide-react';
+import { Users, Search, RefreshCw, AlertCircle, Sparkles, ToggleLeft, ToggleRight } from 'lucide-react';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import SkeletonBlock from '../components/common/SkeletonBlock';
+import { usePlatformSettings } from '../hooks/usePlatformSettings';
 
 const ROLE_STYLES = {
   admin:    'bg-purple-500/10 text-purple-400',
@@ -35,6 +36,7 @@ const AdminPanel = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState(null);
   const [search, setSearch]   = useState('');
+  const { demoMode, setDemoMode } = usePlatformSettings();
 
   const loadUsers = async () => {
     setLoading(true);
@@ -73,6 +75,34 @@ const AdminPanel = () => {
         >
           <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
           Actualizar
+        </button>
+      </div>
+
+      {/* Demo Mode toggle */}
+      <div className="glass-panel rounded-xl border border-white/5 p-5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-brand-gold/10 flex items-center justify-center">
+            <Sparkles size={18} className="text-brand-gold" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-white">Modo Demo</p>
+            <p className="text-xs text-gray-400 mt-0.5">
+              Activa datos de ejemplo para presentar la plataforma a clientes potenciales.
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={() => setDemoMode(!demoMode)}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all border"
+          style={demoMode
+            ? { background: 'rgba(212,162,78,0.15)', borderColor: 'rgba(212,162,78,0.5)', color: '#D4A24E' }
+            : { background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)', color: '#9CA3AF' }
+          }
+        >
+          {demoMode
+            ? <><ToggleRight size={18} /> Activado</>
+            : <><ToggleLeft size={18} /> Desactivado</>
+          }
         </button>
       </div>
 

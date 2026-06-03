@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sparkles, ChevronDown, LogOut } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { usePlatform } from "../../context/PlatformContext";
 
 const DEMO_PROFILES = [
   {
@@ -14,7 +15,7 @@ const DEMO_PROFILES = [
       jobTitle: "CTO",
       role: "admin",
       status: "active",
-      contractedModules: ["cintas", "arcones", "camiones", "buzones", "acopios"],
+      contractedModules: ["cintas", "arcones", "camiones", "buzones", "acopios", "desplazamiento"],
     },
   },
   {
@@ -27,7 +28,7 @@ const DEMO_PROFILES = [
       jobTitle: "Gerente de Planta",
       role: "manager",
       status: "active",
-      contractedModules: ["cintas", "camiones", "buzones", "acopios"],
+      contractedModules: ["cintas", "camiones", "buzones", "acopios", "desplazamiento"],
     },
   },
   {
@@ -40,13 +41,14 @@ const DEMO_PROFILES = [
       jobTitle: "Operario de Cintas",
       role: "operator",
       status: "active",
-      contractedModules: ["cintas", "camiones"],
+      contractedModules: ["cintas", "camiones", "desplazamiento"],
     },
   },
 ];
 
 const DemoProfileSwitcher = () => {
   const { setDemoUser, clearDemoUser } = useAuth();
+  const { demoMode } = usePlatform();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
@@ -63,7 +65,8 @@ const DemoProfileSwitcher = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
-  if (import.meta.env.VITE_DEMO_MODE !== "true") {
+  // Show when demo mode is active in Firestore OR via legacy env var
+  if (!demoMode && import.meta.env.VITE_DEMO_MODE !== "true") {
     return null;
   }
 

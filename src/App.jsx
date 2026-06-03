@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { PlatformProvider } from './context/PlatformContext';
 import Login from './pages/Login';
 import CompleteProfile from './pages/CompleteProfile';
 import AccessPending from './pages/AccessPending';
@@ -13,6 +14,7 @@ import BuzonesModule from './pages/BuzonesModule';
 import AcopiosModule from './pages/AcopiosModule';
 import MenuPage from './pages/MenuPage';
 import AdminPanel from './pages/AdminPanel';
+import DesplazamientoModule from './pages/DesplazamientoModule';
 import LandingPage from './pages/LandingPage';
 import DemoProfileSwitcher from './components/demo/DemoProfileSwitcher';
 
@@ -67,6 +69,7 @@ function App() {
   return (
     <Router>
       <AuthProvider>
+        <PlatformProvider>
         <DemoProfileSwitcher />
         <Routes>
           {/* Public Routes */}
@@ -104,11 +107,13 @@ function App() {
             <Route path="camiones" element={<CamionesModule />} />
             <Route path="buzones" element={<BuzonesModule />} />
             <Route path="acopios" element={<AcopiosModule />} />
+            <Route path="desplazamiento" element={<DesplazamientoModule />} />
             <Route path="admin" element={<AdminPanel />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
+        </PlatformProvider>
       </AuthProvider>
     </Router>
   );

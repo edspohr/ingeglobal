@@ -3,13 +3,14 @@ import { X, Send, Sparkles, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { useLms511 } from "../../hooks/useLms511";
+import { usePlatform } from "../../context/PlatformContext";
 import MiningRobotAvatar from "./MiningRobotAvatar";
 
 const GREETING_BUBBLE_DURATION_MS = 12000;
 
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
 
-function buildSystemInstruction(latest, history) {
+function buildSystemInstruction(latest, history, isDemoMode = false) {
   const now = new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" });
 
   const sensorBlock = latest
@@ -40,11 +41,16 @@ ${sensorBlock}
 
 ${historyBlock}
 
-## Módulos activos con datos reales
-- **Cintas & Caudal**: sensor LMS511 láser midiendo flujo volumétrico en cinta transportadora.
+## Módulos con datos en tiempo real
+- **Cintas & Caudal**: sensor LMS511 láser. Todos los datos de flujo, velocidad y volumen que ves arriba corresponden a este módulo.
 
-## Módulos sin datos aún
-- Control de Arcones, Monitoreo de Buzones, Acopios, Gestión de Camiones: sin conexión a backend por ahora.`;
+## IMPORTANTE — límites de tu conocimiento
+${isDemoMode
+  ? `La plataforma está en MODO DEMO. Los datos de Cintas son reales (LMS511). Los demás módulos (Arcones, Buzones, Acopios, Camiones) muestran datos de ejemplo con fines de demostración comercial. Puedes explicar qué medirían esos módulos en producción real.`
+  : `Los módulos Control de Arcones, Monitoreo de Buzones, Acopios Planta y Gestión de Camiones NO tienen conexión a sensores todavía.
+Si el usuario pregunta por datos de esos módulos, responde con exactitud: "Ese módulo aún no tiene datos en tiempo real conectados a la plataforma. Solo puedo informarte sobre Cintas & Caudal."
+NUNCA inventes cifras ni estimes valores para módulos sin datos. NUNCA digas "aproximadamente" ni uses datos del módulo Cintas para inferir otros módulos.`
+}`;
 }
 
 const formatText = (text) => {
@@ -74,6 +80,7 @@ const SUGGESTIONS = [
 
 const AIAvatar = () => {
   const { latest, history } = useLms511();
+  const { demoMode } = usePlatform();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
@@ -93,9 +100,9 @@ const AIAvatar = () => {
     const genAI = new GoogleGenerativeAI(apiKey);
     modelRef.current = genAI.getGenerativeModel({
       model: "gemini-2.5-flash-lite",
-      systemInstruction: buildSystemInstruction(latest, history),
+      systemInstruction: buildSystemInstruction(latest, history, demoMode),
     });
-  }, [latest, history]);
+  }, [latest, history, demoMode]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;

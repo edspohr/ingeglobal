@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
-import { LogOut, LayoutDashboard, Activity, Database, Truck, Box, Layers, Users } from 'lucide-react';
+import { LogOut, LayoutDashboard, Activity, Database, Truck, Box, Layers, Users, Menu, X as XIcon, AlertTriangle } from 'lucide-react';
 import AIAvatar from '../common/AIAvatar';
 import { getInitials } from '../../lib/formatUser';
+import { usePlatform } from '../../context/PlatformContext';
+import { useDesplazamiento } from '../../hooks/useDesplazamiento';
 
 const BREADCRUMB_LABELS = {
   cintas: 'Cintas & Caudal',
@@ -12,6 +14,7 @@ const BREADCRUMB_LABELS = {
   camiones: 'Gestión Camiones',
   buzones: 'Monitoreo Buzones',
   acopios: 'Acopios Planta',
+  desplazamiento: 'Alerta Desplazamiento',
   admin: 'Gestión Global',
 };
 
@@ -26,29 +29,52 @@ const getBreadcrumbSubLabel = (pathname) => {
 };
 
 const SidebarItem = ({ icon: Icon, label, path, onClick, active }) => (
-  <Link 
+  <Link
     to={path}
     onClick={onClick}
     className={`w-full flex items-center px-4 py-3 mb-1 text-sm font-medium rounded-lg transition-all duration-200 group
-      ${active 
-        ? 'bg-gradient-to-r from-brand-gold/20 to-transparent border-l-2 border-brand-gold text-brand-gold' 
+      ${active
+        ? 'bg-gradient-to-r from-brand-gold/20 to-transparent border-l-2 border-brand-gold text-brand-gold'
         : 'text-gray-400 hover:bg-white/5 hover:text-white'
       }`}
   >
-    <Icon className={`w-5 h-5 mr-3 ${active ? 'text-brand-gold' : 'text-gray-500 group-hover:text-white'}`} />
-    {label}
+    <Icon className={`w-5 h-5 flex-shrink-0 ${label ? 'mr-3' : ''} ${active ? 'text-brand-gold' : 'text-gray-500 group-hover:text-white'}`} />
+    {label && <span className="truncate">{label}</span>}
   </Link>
 );
 
 const SYNC_CYCLE_SECONDS = 45;
 
+const MOBILE_BREAKPOINT = 768;
+
 const DashboardLayout = () => {
   const { user, logout } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { demoMode } = usePlatform();
+  const { isAlert: desplazamientoAlert } = useDesplazamiento(demoMode);
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= MOBILE_BREAKPOINT);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < MOBILE_BREAKPOINT);
   const [now, setNow] = useState(() => new Date());
   const [secondsSinceSync, setSecondsSinceSync] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Auto-collapse sidebar on mobile, expand on desktop
+  const handleResize = useCallback(() => {
+    const mobile = window.innerWidth < MOBILE_BREAKPOINT;
+    setIsMobile(mobile);
+    if (mobile) setSidebarOpen(false);
+    else setSidebarOpen(true);
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [handleResize]);
+
+  // Close sidebar when navigating on mobile
+  useEffect(() => {
+    if (isMobile) setSidebarOpen(false);
+  }, [location.pathname, isMobile]);
 
   // Live clock + simulated sync-cycle counter. Two independent intervals so
   // one can be tuned without affecting the other. Both cleared on unmount
@@ -87,8 +113,20 @@ const DashboardLayout = () => {
 
   return (
     <div className="flex h-screen bg-brand-dark overflow-hidden">
+      {/* Mobile backdrop */}
+      {isMobile && sidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className={`${sidebarOpen ? 'w-72' : 'w-20'} bg-[#0F1623] border-r border-white/5 flex flex-col transition-all duration-300 relative z-20`}>
+      <aside className={`
+        ${isMobile ? 'fixed inset-y-0 left-0 z-40' : 'relative z-20'}
+        ${sidebarOpen ? 'w-72' : isMobile ? '-translate-x-full w-72' : 'w-20'}
+        bg-[#0F1623] border-r border-white/5 flex flex-col transition-all duration-300
+      `}>
         <div className="h-20 flex items-center px-6 border-b border-white/5 bg-[#0A0F18]">
           <img src="/logo_full.jpg" className="h-8 w-auto mr-3 rounded" />
           {sidebarOpen && <span className="text-white font-bold tracking-wide">INGEGLOBAL</span>}
@@ -137,6 +175,31 @@ const DashboardLayout = () => {
 
           <SidebarItem icon={Truck} label={sidebarOpen ? "Gestión Camiones" : ""} path="/dashboard/camiones" active={location.pathname.includes('camiones')} />
 
+          <div className="mt-4 mb-2 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            {sidebarOpen ? 'Alertas' : '---'}
+          </div>
+
+          <Link
+            to="/dashboard/desplazamiento"
+            onClick={() => isMobile && setSidebarOpen(false)}
+            className={`w-full flex items-center px-4 py-3 mb-1 text-sm font-medium rounded-lg transition-all duration-200 group
+              ${location.pathname.includes('desplazamiento')
+                ? 'bg-gradient-to-r from-brand-gold/20 to-transparent border-l-2 border-brand-gold text-brand-gold'
+                : desplazamientoAlert
+                  ? 'text-red-400 hover:bg-red-500/10 border-l-2 border-red-500/60'
+                  : 'text-gray-400 hover:bg-white/5 hover:text-white'
+              }`}
+          >
+            <AlertTriangle className={`w-5 h-5 flex-shrink-0 ${sidebarOpen ? 'mr-3' : ''} ${
+              location.pathname.includes('desplazamiento') ? 'text-brand-gold' :
+              desplazamientoAlert ? 'text-red-400 animate-pulse' : 'text-gray-500 group-hover:text-white'
+            }`} />
+            {sidebarOpen && <span className="truncate">Alerta Desplazamiento</span>}
+            {sidebarOpen && desplazamientoAlert && (
+              <span className="ml-auto w-2 h-2 rounded-full bg-red-500 animate-pulse flex-shrink-0" />
+            )}
+          </Link>
+
           {user?.role === 'admin' && (
              <>
                <div className="mt-4 mb-2 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -157,8 +220,15 @@ const DashboardLayout = () => {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col relative overflow-hidden bg-brand-dark">
-        <header className="h-20 glass-panel border-b border-white/5 flex items-center justify-between px-8 z-10 sticky top-0">
-          <div className="flex items-center gap-6">
+        <header className="h-20 glass-panel border-b border-white/5 flex items-center justify-between px-4 md:px-8 z-10 sticky top-0">
+          <div className="flex items-center gap-3 md:gap-6">
+            <button
+              onClick={() => setSidebarOpen(v => !v)}
+              className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+              aria-label="Toggle sidebar"
+            >
+              {sidebarOpen && isMobile ? <XIcon size={20} /> : <Menu size={20} />}
+            </button>
             <div>
               <h2 className="text-xl font-bold">
                 <span className="text-white">Panel de Control</span>
@@ -187,6 +257,28 @@ const DashboardLayout = () => {
           
         </header>
 
+        {/* Global displacement alert banner */}
+        <AnimatePresence>
+          {desplazamientoAlert && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden"
+            >
+              <div className="flex items-center gap-3 px-4 md:px-8 py-2 bg-red-500/15 border-b border-red-500/30 text-red-300 text-xs">
+                <AlertTriangle size={14} className="flex-shrink-0 animate-pulse" />
+                <span className="font-semibold">ALERTA DE DESPLAZAMIENTO:</span>
+                <span className="text-red-400/80">Se han detectado movimientos fuera del rango normal en la plataforma.</span>
+                <Link to="/dashboard/desplazamiento" className="ml-auto flex items-center gap-1 text-red-300 hover:text-white underline underline-offset-2 font-medium whitespace-nowrap">
+                  Ver módulo
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
@@ -194,7 +286,7 @@ const DashboardLayout = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.25, ease: 'easeInOut' }}
-            className="flex-1 overflow-y-auto p-8 scroll-smooth"
+            className="flex-1 overflow-y-auto px-4 py-6 md:p-8 scroll-smooth"
           >
             <Outlet />
           </motion.div>
