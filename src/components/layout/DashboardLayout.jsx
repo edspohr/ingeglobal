@@ -50,7 +50,7 @@ const MOBILE_BREAKPOINT = 768;
 const DashboardLayout = () => {
   const { user, logout } = useAuth();
   const { demoMode } = usePlatform();
-  const { isAlert: desplazamientoAlert } = useDesplazamiento(demoMode);
+  const { isAlert: desplazamientoAlert, criticalRover } = useDesplazamiento(demoMode);
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= MOBILE_BREAKPOINT);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < MOBILE_BREAKPOINT);
   const [now, setNow] = useState(() => new Date());
@@ -265,8 +265,12 @@ const DashboardLayout = () => {
             >
               <div className="flex items-center gap-3 px-4 md:px-8 py-2 bg-red-500/15 border-b border-red-500/30 text-red-300 text-xs">
                 <AlertTriangle size={14} className="flex-shrink-0 animate-pulse" />
-                <span className="font-semibold">ALERTA DE DESPLAZAMIENTO:</span>
-                <span className="text-red-400/80">Se han detectado movimientos fuera del rango normal en la plataforma.</span>
+                <span className="font-semibold">ALERTA CRÍTICA GNSS:</span>
+                <span className="text-red-400/80">
+                  {criticalRover
+                    ? `${criticalRover.name} (${criticalRover.location}) · ${criticalRover.totalCm.toFixed(2)} cm de desplazamiento total.`
+                    : 'Se han detectado movimientos fuera del rango normal en la plataforma.'}
+                </span>
                 <Link to="/dashboard/desplazamiento" className="ml-auto flex items-center gap-1 text-red-300 hover:text-white underline underline-offset-2 font-medium whitespace-nowrap">
                   Ver módulo
                 </Link>

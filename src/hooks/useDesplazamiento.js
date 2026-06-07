@@ -1,60 +1,43 @@
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
+import { mockGnss, classifyRover, GNSS_THRESHOLDS_CM } from '../data/mockData';
 
-// Mock data for demo mode — simulates a multi-axis ground displacement sensor
-const MOCK_HISTORY = Array.from({ length: 24 }, (_, i) => {
-  const base = i * (Math.PI / 12);
-  return {
-    hora: `${String(i).padStart(2, '0')}:00`,
-    dx_mm: +(Math.sin(base) * 0.8 + Math.random() * 0.3).toFixed(2),
-    dy_mm: +(Math.cos(base) * 0.5 + Math.random() * 0.2).toFixed(2),
-    dz_mm: +(Math.random() * 0.4 - 0.1).toFixed(2),
-    inclinacion_deg: +(0.12 + Math.sin(base) * 0.06 + Math.random() * 0.02).toFixed(3),
-    vibracion: +(Math.random() * 0.25 + 0.05).toFixed(3),
-  };
-});
+export { GNSS_THRESHOLDS_CM };
 
-const MOCK_LATEST = {
-  dx_mm: 1.24,
-  dy_mm: 0.87,
-  dz_mm: 0.11,
-  inclinacion_deg: 0.142,
-  vibracion: 0.18,
-  estado: 'normal',
-  ultima_medicion: new Date(Date.now() - 45_000).toISOString(),
-};
-
-// Thresholds (mm) for alert banner
-export const DESPLAZAMIENTO_THRESHOLDS = {
-  dx_mm: 2.0,
-  dy_mm: 2.0,
-  dz_mm: 1.0,
-  inclinacion_deg: 0.5,
-};
-
+// Devuelve el snapshot completo del sistema GNSS: sistema, RTK, rovers
+// (con estado calculado), eventos y la bandera global de alerta crítica
+// que consume el banner del DashboardLayout. Hoy lee del mock; mañana
+// se reemplaza por un fetch al endpoint del proveedor sin tocar consumidores.
 export function useDesplazamiento(isDemoMode) {
-  const [data, setData] = useState(null);
-  const [history, setHistory] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (isDemoMode) {
-      setData(MOCK_LATEST);
-      setHistory(MOCK_HISTORY);
-      setLoading(false);
-    } else {
-      // Production: no sensor wired yet
-      setData(null);
-      setHistory([]);
-      setLoading(false);
+  return useMemo(() => {
+    if (!isDemoMode) {
+      return {
+        loading: false,
+        system: null,
+        rtk: null,
+        rovers: [],
+        events: [],
+        isAlert: false,
+        criticalRover: null,
+      };
     }
+
+    const rovers = mockGnss.rovers.map((r) => {
+      const { status, totalCm } = classifyRover(r);
+      return { ...r, status, totalCm };
+    });
+
+    const criticalRover = rovers.find((r) => r.status === 'critical') || null;
+    const hasWarning    = rovers.some((r) => r.status === 'warning');
+    const globalRisk    = criticalRover ? 'CRÍTICO' : hasWarning ? 'ADVERTENCIA' : 'NORMAL';
+
+    return {
+      loading: false,
+      system: { ...mockGnss.system, globalRisk },
+      rtk: mockGnss.rtk,
+      rovers,
+      events: mockGnss.events,
+      isAlert: Boolean(criticalRover),
+      criticalRover,
+    };
   }, [isDemoMode]);
-
-  const isAlert = data
-    ? Math.abs(data.dx_mm) >= DESPLAZAMIENTO_THRESHOLDS.dx_mm ||
-      Math.abs(data.dy_mm) >= DESPLAZAMIENTO_THRESHOLDS.dy_mm ||
-      Math.abs(data.dz_mm) >= DESPLAZAMIENTO_THRESHOLDS.dz_mm ||
-      Math.abs(data.inclinacion_deg) >= DESPLAZAMIENTO_THRESHOLDS.inclinacion_deg
-    : false;
-
-  return { data, history, loading, isAlert };
 }
