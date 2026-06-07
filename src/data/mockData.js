@@ -75,12 +75,17 @@ export const mockBuzones = {
 };
 
 // --- ACOPIOS (Stockpiles) ---------------------------------------------------
+// `mapPosition` son coordenadas porcentuales (0–100) sobre planta-aerea.jpg.
+// Cuando se reemplace por backend real, las pilas vienen con su `mapPosition`
+// asignada por el levantamiento topográfico (o por configuración del cliente).
 export const mockAcopios = {
   piles: [
-    { id: 'P1', name: 'Acopio Norte',  material: 'Cobre',   volume_m3: 14200, capacity_m3: 20000, lastSurvey: '04/06/2026' },
-    { id: 'P2', name: 'Acopio Sur',    material: 'Estéril', volume_m3:  8650, capacity_m3: 15000, lastSurvey: '04/06/2026' },
-    { id: 'P3', name: 'Acopio Este',   material: 'Mineral', volume_m3: 11820, capacity_m3: 18000, lastSurvey: '03/06/2026' },
-    { id: 'P4', name: 'Acopio Oeste',  material: 'Cobre',   volume_m3:  5240, capacity_m3: 12000, lastSurvey: '04/06/2026' },
+    { id: 'P1', name: 'Acopio 1', material: 'Arena',    volume_m3: 14200, capacity_m3: 20000, lastSurvey: '04/06/2026', mapPosition: { x: 18, y: 28 } },
+    { id: 'P2', name: 'Acopio 2', material: 'Gravilla', volume_m3:  8650, capacity_m3: 15000, lastSurvey: '04/06/2026', mapPosition: { x: 14, y: 46 } },
+    { id: 'P3', name: 'Acopio 3', material: 'Grava',    volume_m3: 11820, capacity_m3: 18000, lastSurvey: '03/06/2026', mapPosition: { x: 70, y: 30 } },
+    { id: 'P4', name: 'Acopio 4', material: 'Bolones',  volume_m3:  5240, capacity_m3: 12000, lastSurvey: '04/06/2026', mapPosition: { x: 72, y: 52 } },
+    { id: 'P5', name: 'Acopio 5', material: 'Integral', volume_m3:  9300, capacity_m3: 14000, lastSurvey: '04/06/2026', mapPosition: { x: 50, y: 38 } },
+    { id: 'P6', name: 'Acopio 6', material: 'Filler',   volume_m3:  3100, capacity_m3:  6000, lastSurvey: '02/06/2026', mapPosition: { x: 28, y: 36 } },
   ],
   volumeBy7d: DAYS_7.map((day, i) => ({
     time: day,
