@@ -12,12 +12,23 @@ service cloud.firestore {
 
     // Rules for 'users' collection
     match /users/{userId} {
-      // Allow users to create their own document (for profile completion)
-      allow create: if request.auth != null && request.auth.uid == userId;
-      
+      // Allow users to create their own document (for profile completion).
+      // Admins can also create user documents (used by the AdminPanel
+      // "Agregar Usuario" flow, which creates an Auth user via a secondary
+      // app and then writes the Firestore record under the admin's session).
+      allow create: if request.auth != null && (request.auth.uid == userId || isAdmin());
+
       // Allow users to read and update their own document
       // Admins have full access (read, update, delete)
       allow read, update, delete: if request.auth != null && (request.auth.uid == userId || isAdmin());
+    }
+
+    // Platform-wide settings (e.g. demoMode toggle).
+    // Any authenticated user can READ so their UI reflects the current mode;
+    // only admins can WRITE.
+    match /settings/{settingId} {
+      allow read:  if request.auth != null;
+      allow write: if isAdmin();
     }
 
     // Default deny rule for all other collections

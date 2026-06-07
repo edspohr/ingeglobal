@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Search, RefreshCw, AlertCircle, Sparkles, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Users, Search, RefreshCw, AlertCircle, Sparkles, ToggleLeft, ToggleRight, Loader2, UserPlus, CheckCircle2 } from 'lucide-react';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import SkeletonBlock from '../components/common/SkeletonBlock';
 import { usePlatformSettings } from '../hooks/usePlatformSettings';
+import AddUserModal from '../components/admin/AddUserModal';
 
 const ROLE_STYLES = {
   admin:    'bg-purple-500/10 text-purple-400',
@@ -36,7 +37,21 @@ const AdminPanel = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState(null);
   const [search, setSearch]   = useState('');
-  const { demoMode, setDemoMode } = usePlatformSettings();
+  const { demoMode, setDemoMode, saving: savingDemo } = usePlatformSettings();
+  const [demoError, setDemoError] = useState(null);
+  const [showAddUser, setShowAddUser] = useState(false);
+  const [createdUserMsg, setCreatedUserMsg] = useState(null);
+
+  const handleToggleDemo = async () => {
+    setDemoError(null);
+    try {
+      await setDemoMode(!demoMode);
+      window.location.reload();
+    } catch (err) {
+      console.error('[AdminPanel] setDemoMode:', err);
+      setDemoError('No se pudo actualizar el Modo Demo. Intenta de nuevo.');
+    }
+  };
 
   const loadUsers = async () => {
     setLoading(true);
@@ -68,42 +83,69 @@ const AdminPanel = () => {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-white">Panel de Administración</h1>
-        <button
-          onClick={loadUsers}
-          disabled={loading}
-          className="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-400 hover:text-white bg-white/5 border border-white/10 rounded-lg transition-colors disabled:opacity-40"
-        >
-          <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
-          Actualizar
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowAddUser(true)}
+            className="flex items-center gap-2 px-3 py-1.5 text-xs text-black bg-brand-gold hover:bg-yellow-400 font-semibold rounded-lg transition-colors"
+          >
+            <UserPlus size={13} />
+            Agregar Usuario
+          </button>
+          <button
+            onClick={loadUsers}
+            disabled={loading}
+            className="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-400 hover:text-white bg-white/5 border border-white/10 rounded-lg transition-colors disabled:opacity-40"
+          >
+            <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
+            Actualizar
+          </button>
+        </div>
       </div>
 
-      {/* Demo Mode toggle */}
-      <div className="glass-panel rounded-xl border border-white/5 p-5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-brand-gold/10 flex items-center justify-center">
-            <Sparkles size={18} className="text-brand-gold" />
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-white">Modo Demo</p>
-            <p className="text-xs text-gray-400 mt-0.5">
-              Activa datos de ejemplo para presentar la plataforma a clientes potenciales.
-            </p>
-          </div>
+      {createdUserMsg && (
+        <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-sm">
+          <CheckCircle2 size={16} />
+          {createdUserMsg}
         </div>
-        <button
-          onClick={() => setDemoMode(!demoMode)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all border"
-          style={demoMode
-            ? { background: 'rgba(212,162,78,0.15)', borderColor: 'rgba(212,162,78,0.5)', color: '#D4A24E' }
-            : { background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)', color: '#9CA3AF' }
-          }
-        >
-          {demoMode
-            ? <><ToggleRight size={18} /> Activado</>
-            : <><ToggleLeft size={18} /> Desactivado</>
-          }
-        </button>
+      )}
+
+      {/* Demo Mode toggle */}
+      <div className="glass-panel rounded-xl border border-white/5 p-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-brand-gold/10 flex items-center justify-center">
+              <Sparkles size={18} className="text-brand-gold" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-white">Modo Demo</p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                Activa datos de ejemplo para presentar la plataforma a clientes potenciales.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={handleToggleDemo}
+            disabled={savingDemo}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all border disabled:opacity-60 disabled:cursor-not-allowed"
+            style={demoMode
+              ? { background: 'rgba(212,162,78,0.15)', borderColor: 'rgba(212,162,78,0.5)', color: '#D4A24E' }
+              : { background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)', color: '#9CA3AF' }
+            }
+          >
+            {savingDemo
+              ? <><Loader2 size={18} className="animate-spin" /> Guardando...</>
+              : demoMode
+                ? <><ToggleRight size={18} /> Activado</>
+                : <><ToggleLeft size={18} /> Desactivado</>
+            }
+          </button>
+        </div>
+        {demoError && (
+          <div className="mt-3 flex items-center gap-2 text-xs text-red-400">
+            <AlertCircle size={14} />
+            {demoError}
+          </div>
+        )}
       </div>
 
       {/* Single tab header — visual only, no toggle needed */}
@@ -177,6 +219,17 @@ const AdminPanel = () => {
           </div>
         )}
       </div>
+
+      <AddUserModal
+        isOpen={showAddUser}
+        onClose={() => setShowAddUser(false)}
+        onCreated={(displayName) => {
+          setShowAddUser(false);
+          setCreatedUserMsg(`Usuario "${displayName}" creado correctamente.`);
+          loadUsers();
+          setTimeout(() => setCreatedUserMsg(null), 5000);
+        }}
+      />
     </div>
   );
 };

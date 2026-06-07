@@ -175,10 +175,6 @@ const DashboardLayout = () => {
 
           <SidebarItem icon={Truck} label={sidebarOpen ? "Gestión Camiones" : ""} path="/dashboard/camiones" active={location.pathname.includes('camiones')} />
 
-          <div className="mt-4 mb-2 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-            {sidebarOpen ? 'Alertas' : '---'}
-          </div>
-
           <Link
             to="/dashboard/desplazamiento"
             onClick={() => isMobile && setSidebarOpen(false)}

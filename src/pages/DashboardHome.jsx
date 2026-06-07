@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Activity, Database, Truck, Layers, Radio } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLms511 } from '../hooks/useLms511';
+import { usePlatform } from '../context/PlatformContext';
+import { mockCamiones, mockArcones } from '../data/mockData';
 import MetricCard from '../components/common/MetricCard';
 import SkeletonBlock from '../components/common/SkeletonBlock';
 
@@ -15,8 +17,20 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
 };
 
+const formatM3 = (v) => `${Number(v).toLocaleString('es-CL', { maximumFractionDigits: 0 })} m³`;
+
 const DashboardHome = () => {
   const { latest, loading, noData, configError } = useLms511();
+  const { demoMode } = usePlatform();
+
+  const camionesTurno = useMemo(
+    () => mockCamiones.tripsByHour.reduce((sum, p) => sum + p.value, 0),
+    []
+  );
+  const stockArcones = useMemo(
+    () => mockArcones.bins.reduce((sum, b) => sum + b.current, 0),
+    []
+  );
 
   if (loading) return (
     <div className="space-y-8">
@@ -32,15 +46,16 @@ const DashboardHome = () => {
     </div>
   );
 
-  const hasFlow = !noData && !configError && latest;
-  const flow_m3_h = hasFlow ? latest.flow_m3_h : null;
-  const volume_day = hasFlow ? latest.volume_day_m3 : null;
+  const hasLiveFlow = !noData && !configError && latest;
+  const operative = demoMode || hasLiveFlow;
+  const flow_m3_h = latest?.flow_m3_h ?? null;
+  const volume_day = latest?.volume_day_m3 ?? null;
 
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-white">Resumen General de Operaciones</h1>
-        {hasFlow ? (
+        {operative ? (
           <span className="px-3 py-1 bg-green-500/10 text-green-400 rounded-full text-xs font-bold border border-green-500/20 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
             SISTEMA OPERATIVO
@@ -59,7 +74,6 @@ const DashboardHome = () => {
         animate="visible"
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
       >
-        {/* Flujo — real desde Supabase */}
         <motion.div variants={itemVariants} whileHover={{ scale: 1.03 }}>
           <Link to="/dashboard/cintas" className="block">
             <MetricCard
@@ -75,14 +89,11 @@ const DashboardHome = () => {
           </Link>
         </motion.div>
 
-        {/* Volumen diario — real desde Supabase */}
         <motion.div variants={itemVariants} whileHover={{ scale: 1.03 }}>
           <Link to="/dashboard/cintas" className="block">
             <MetricCard
               title="Volumen Diario"
-              value={volume_day != null
-                ? `${Number(volume_day).toLocaleString('es-CL', { maximumFractionDigits: 0 })} m³`
-                : '— m³'}
+              value={volume_day != null ? formatM3(volume_day) : '— m³'}
               trend="up"
               trendValue={volume_day != null ? 'Hoy' : 'Sin señal'}
               icon={Database}
@@ -91,28 +102,26 @@ const DashboardHome = () => {
           </Link>
         </motion.div>
 
-        {/* Camiones — sin backend aún */}
         <motion.div variants={itemVariants} whileHover={{ scale: 1.03 }}>
           <Link to="/dashboard/camiones" className="block">
             <MetricCard
               title="Camiones Turno"
-              value="—"
+              value={demoMode ? `${camionesTurno.toLocaleString('es-CL')} viajes` : '—'}
               trend="up"
-              trendValue="Sin datos"
+              trendValue={demoMode ? 'En vivo' : 'Sin datos'}
               icon={Truck}
               color="emerald"
             />
           </Link>
         </motion.div>
 
-        {/* Arcones — sin backend aún */}
         <motion.div variants={itemVariants} whileHover={{ scale: 1.03 }}>
           <Link to="/dashboard/arcones" className="block">
             <MetricCard
               title="Stock Arcones"
-              value="—"
+              value={demoMode ? formatM3(stockArcones) : '—'}
               trend="up"
-              trendValue="Sin datos"
+              trendValue={demoMode ? 'En vivo' : 'Sin datos'}
               icon={Layers}
               color="blue"
             />

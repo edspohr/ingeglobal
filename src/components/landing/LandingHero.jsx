@@ -55,8 +55,8 @@ export default function LandingHero() {
         >
           Inteligencia Operacional
           <br />
-          para la Industria{' '}
-          <span className="text-gradient-gold">Minera</span>
+          para la Industria del{' '}
+          <span className="text-gradient-gold">Movimiento de Tierra, Minería y Áridos</span>
         </motion.h1>
 
         {/* Subtitle */}

@@ -7,6 +7,7 @@ const SETTINGS_DOC = doc(db, 'settings', 'platform');
 export function usePlatformSettings() {
   const [demoMode, setDemoModeState] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const unsub = onSnapshot(SETTINGS_DOC, (snap) => {
@@ -17,8 +18,13 @@ export function usePlatformSettings() {
   }, []);
 
   const setDemoMode = async (value) => {
-    await setDoc(SETTINGS_DOC, { demoMode: value }, { merge: true });
+    setSaving(true);
+    try {
+      await setDoc(SETTINGS_DOC, { demoMode: value }, { merge: true });
+    } finally {
+      setSaving(false);
+    }
   };
 
-  return { demoMode, setDemoMode, loading };
+  return { demoMode, setDemoMode, loading, saving };
 }

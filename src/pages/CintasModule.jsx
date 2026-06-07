@@ -5,6 +5,8 @@ import FlowChart from '../components/visualizations/FlowChart';
 import { Activity, Clock, Calendar, BarChart2, Radio } from 'lucide-react';
 import { motion } from 'framer-motion';
 import SkeletonBlock from '../components/common/SkeletonBlock';
+import { usePlatform } from '../context/PlatformContext';
+import { mockCintas } from '../data/mockData';
 
 const GRANULARITY_OPTIONS = [
   { key: 'shift',   label: 'Turno'  },
@@ -45,18 +47,27 @@ const NoDataState = () => (
 );
 
 const CintasModule = () => {
+  const { demoMode } = usePlatform();
   const {
     sensors,
     selectedSensor,
     setSelectedSensor,
     granularity,
     setGranularity,
-    latest,
-    history,
+    latest: realLatest,
+    history: realHistory,
     loading,
     noData,
     configError,
   } = useLms511();
+
+  // When demoMode is on and the real sensor has no data (or config error),
+  // fall back to the mock dataset so the dashboard stays populated for
+  // commercial demos. Real sensor data always wins when available.
+  const useMock  = demoMode && (noData || configError || !realLatest);
+  const latest   = useMock ? mockCintas.latest  : realLatest;
+  const history  = useMock ? mockCintas.history : realHistory;
+  const showEmpty = (configError || noData) && !demoMode;
 
   if (loading) return (
     <div className="space-y-6">
@@ -76,7 +87,7 @@ const CintasModule = () => {
     </div>
   );
 
-  if (configError || noData) {
+  if (showEmpty) {
     return (
       <div className="space-y-6">
         <div>
